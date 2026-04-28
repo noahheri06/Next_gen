@@ -220,7 +220,7 @@ def exercise3(impedance):
 
   else:
     print("Step up needed")
-    X = (Rl(Z0 - Rl))**(1/2) - Xl
+    X = (Rl*(Z0 - Rl))**(1/2) - Xl
     B = (((Z0-Rl)/Rl)**(1/2))/(Z0)
     print(f"B = {B}, X = {X}")
     #+ or - choice twice, both should have same sign
