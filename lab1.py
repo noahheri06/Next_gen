@@ -54,32 +54,38 @@ def plot_smith_charts(measured_file, given_file, m=0, n=0):
 
 def method1():
   frequency, S11, S21, _, _ = readout_s2p("recalibrate")
-  frequency = frequency[:-3*len(frequency)//7]
+  #frequency = frequency[:-3*len(frequency)//7]
   S11 = S11[:len(frequency)]
   S21 = S21[:len(frequency)]
-  phase = np.angle(S11, deg=False)
-  magnitude = 20*np.log10(np.abs(S11))
+  phase = np.unwrap(np.angle(S21, deg=False))
+  magnitude = 20*np.log10(np.abs(S21))
 
-
+  max_freq=6e9
+  min_freq = 0e9
 
   plt.subplot(2, 1, 1)
-  plt.plot(frequency, magnitude)
-  plt.title("Magnitude of S11")
-  plt.xlabel("Frequency (Hz)")
-  plt.ylabel("Magnitude (dB)")
+  plt.plot(frequency/1e9, phase)
+  plt.title("Phase of S21")
+  plt.xlabel("Frequency (GHz)")
+  plt.ylabel("Phase (rad)")
   plt.grid()
 
   time_delay = -np.gradient(phase, frequency*(2*np.pi))
   plt.subplot(2, 1, 2)
-  plt.plot(frequency, time_delay)
-  plt.ylim(0, 1e-10)
+  plt.plot(frequency/1e9, time_delay*1e12)
+  plt.ylim(0, 100)
   plt.title("Time Delay")
-  plt.xlabel("Frequency (Hz)")
-  plt.ylabel("Time Delay (s)")
+  plt.xlabel("Frequency (GHz)")
+  plt.ylabel("Time Delay (ps)")
   plt.grid()
+  plt.tight_layout()
   plt.show()
 
-  average_delay = np.mean(time_delay[0:len(time_delay)])
+  mask = (frequency >= min_freq) & (frequency <= max_freq)
+  filtered_delay = time_delay[mask]
+
+
+  average_delay = np.mean(filtered_delay)
   print(average_delay)
   length = average_delay * 3e8*100
   print(f"Estimated length of the cable: {length:.2f} centimeters")
@@ -159,7 +165,7 @@ def excersice2(measuered_transmission, given_probe):
 
 
 if __name__ == "__main__":
-  #method1()
-  method2()
+  method1()
+  #method2()
   #excersice2("exerciswe2beter", "XMW_probe")
   pass
