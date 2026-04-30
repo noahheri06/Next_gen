@@ -1,36 +1,53 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-Z0  =50
+Z0 = 50
 C = 3e8
-# =============================================================================
-# a
-# =============================================================================
 
-f = [12e9, 15e9, 16e9]
-thetha = np.linspace(-np.pi, np.pi, 1000000)
+# Frequencies
+frequencies = [12e9, 15e9, 16e9]
 
+# Angles
+theta = np.linspace(-np.pi, np.pi, 2000)
+
+# Dimensions
 lx = 8.86e-2
 ly = 6.6e-2
 
+# Planes (phi values)
+planes = [0, np.pi/2]
+plane_labels = [r'$\phi = 0$', r'$\phi = 90\degree$']
 
+def f_function(theta, phi, f):
+    lambd = C / f
+    gammax = (lx / lambd) * np.sin(theta) * np.cos(phi)
+    gammay = (ly / lambd) * np.sin(theta) * np.sin(phi)
+    f_val = np.sinc(gammax) * np.sinc(gammay)
+    return f_val, lambd, gammax, gammay
 
-def f_function(thetha, phi,f):
-    lambd = C/f
-    gammax = (lx/lambd)*np.sin(thetha)*np.cos(phi)
-    gammay = (lx/lambd)*np.sin(thetha)*np.sin(phi)
-    f_function = np.sinc(gammax)*np.sinc(gammay)
-    return f_function, lambd, gammax, gammay
+# Create subplots (rows = planes, cols = frequencies)
+fig, axes = plt.subplots(len(planes), len(frequencies), figsize=(15, 8), sharex=True, sharey=True)
 
-for i in range(3):
-    phi = np.pi()
-    f_function1, lambd, gammax, gammay = f_function(thetha, phi, f[i])
-    s1 = f_function1**2/(2*(120*np.pi)*lambd**2)
-    normalized = 10*np.log10(s1/np.max(s1))
+for row, phi in enumerate(planes):
+    for col, f in enumerate(frequencies):
+        ax = axes[row, col]
 
-    plt.plot(thetha, normalized) # from first principle
-    plt.plot(thetha, 10*np.log10(np.sinc(gammax)**2)) # from simplified formula case phi = 0
-    plt.show()
+        f_val, lambd, gammax, gammay = f_function(theta, phi, f)
 
+        s1 = f_val**2
+        normalized = 10 * np.log10(s1 / np.max(s1))
 
+        ax.plot(np.rad2deg(theta), normalized)
+        ax.set_title(f"f = {f/1e9:.0f} GHz")
 
+        if col == 0:
+            ax.set_ylabel(f"{plane_labels[row]}\nNormalized Power (dB)")
+        if row == len(planes) - 1:
+            ax.set_xlabel(r'$\theta$ (deg)')
+        plt.ylim(-40, 0)
+        plt.xlim(-180, 180)
+        ax.grid(True)
+
+plt.suptitle("Radiation Pattern for Different Frequencies and Planes", fontsize=16)
+plt.tight_layout()
+plt.show()
