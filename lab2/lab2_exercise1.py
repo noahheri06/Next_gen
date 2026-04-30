@@ -37,8 +37,9 @@ Pi = 0.1
 
 Ztot = Zg+Zin
 Itot = np.sqrt(Pi/Ztot)
-Pl = np.abs(Itot)**2 / 2 * np.real(Zin)
-Pr = Pl * np.abs(Gamma)**2
+Pinc = np.abs(Itot)**2 / 2 * np.real(Zin)
+Pl = Pinc * (1-np.abs(Gamma)**2)
+Pr = Pinc * np.abs(Gamma)**2
 
 print(f"1c: Pl = {Pl}, Pr = {Pr}")
 
@@ -46,6 +47,9 @@ print(f"1c: Pl = {Pl}, Pr = {Pr}")
 # d
 # =============================================================================
 
+beta = 0.85 * k0
+
+lambd = 2*np.pi / beta
 
 l = lambd/4
 
