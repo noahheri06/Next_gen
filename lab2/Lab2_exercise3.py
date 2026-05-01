@@ -83,7 +83,7 @@ for i in range(2):
     for j in range(3):
         Ae = efficiencies[j]*Ap[i]
         d = (4*np.pi*Ae)/(lambda_range**2)
-        plt.plot(lambda_range, d)
-        plt.title(f"directitty at area = {Ae}")
+        plt.plot(freq_range, d)
+        plt.title(f"directitty at area = {Ae}, vs freq")
         plt.show()
 
