@@ -37,9 +37,7 @@ def calculate_minus10dB_bandwidth(freq, s11_db):
 
 def task1():
     freq, S11, S21, S12, S22 = readout_s2p('0')
-    #S11 = S11/np.max(np.abs(S11))
-    p_transmitted = 1-np.abs(S11)**2
-    p_transmitted  = p_transmitted/np.max(p_transmitted)
+
     return_loss = 20 * np.log10(np.abs(S11))
 
     bandwidth = calculate_minus10dB_bandwidth(freq, return_loss)
@@ -61,21 +59,42 @@ def task2():
     p_1 =[]
     p_2 = []
     p_3 = []
-    for i in range(45):
+    for i in range(46):
+        # print(i)
         freq, S11, S21, S12, S22 = readout_s2p(f'{i*2}')
         #find correct indexis
-        index1 = 1
-        index2 = freq.index(15e9)
-        index3 = freq.index(16e9)
- 
-        
+        index1 = np.where(freq == 13e9)
+        index2 = np.where(freq == 15e9)
+        index3 = np.where(freq == 16e9)
 
-        p_1.append(np.abs(S21[index1])**2)
-        p_2.append(np.abs(S21[index2])**2)
-        p_3.append(np.abs(S21[index3])**2)
+        db = 10*np.log10(np.abs(S21)**2)
 
-    angles = np.linspace(0, 90, 45)
-    plt.plot(p_1, angles)
+        if(i==0):
+            p_1.append(db[index1])
+            p_2.append(db[index2])
+            p_3.append(db[index3])
+        else:
+            p_1.append(db[index1])
+            p_1.insert(0, db[index1])
+            p_2.append(db[index2])
+            p_2.insert(0, db[index2])
+            p_3.append(db[index3])
+            p_3.insert(0, db[index3])
+
+    angles = np.linspace(-90, 90, 91)
+    #print(angles)
+
+    max = np.max(p_1)
+    p_1 = p_1 - max
+    plt.plot(angles, p_1)
+
+
+    # if(plot_with_overlay):
+    plt.grid()
+
+
+    plt.xlabel("angle in degrees")
+    plt.ylabel("S21 in dB")
     plt.show()
 
 

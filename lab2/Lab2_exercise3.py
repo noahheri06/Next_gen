@@ -5,7 +5,7 @@ Z0 = 50
 C = 3e8
 
 # Frequencies
-frequencies = [12e9, 15e9, 16e9]
+frequencies = [13e9, 15e9, 16e9]
 
 # Angles
 theta = np.linspace(-np.pi, np.pi, 2000)
