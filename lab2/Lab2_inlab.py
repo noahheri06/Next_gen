@@ -9,7 +9,7 @@ import sympy as sp
 
 def readout_s2p(your_file):
 
-  ntwk = rf.Network(f'lab2/measurements/{your_file}.s2p')
+  ntwk = rf.Network(f'lab2/measurements/Practicum2-1.38m/{your_file}.s2p')
 
   # Frequency (Hz)
   freq = ntwk.f
@@ -24,8 +24,8 @@ def readout_s2p(your_file):
   S22 = S[:, 1, 1]
   return(freq, S11, S21, S12, S22)
 
-def calculate_minus10dB_bandwidth(freq, s11_db):
-    valid_indices = np.where(s11_db <= -10)[0]
+def calculate_minusdB_bandwidth(freq, s11_db, threshold=-10):
+    valid_indices = np.where(s11_db <= threshold)[0]
 
     if len(valid_indices) == 0:
         return 0.0
@@ -40,7 +40,7 @@ def task1():
 
     return_loss = 20 * np.log10(np.abs(S11))
 
-    bandwidth = calculate_minus10dB_bandwidth(freq, return_loss)
+    bandwidth = calculate_minusdB_bandwidth(freq, return_loss, threshold=-10)
     
     print(f"-10 dB Bandwidth: {bandwidth / 1e9:.2f} GHz")
 
@@ -99,10 +99,39 @@ def task2():
 
 
 def task3():
-    pass
+    angles_deg = np.arange(0, 92, 2)
+    angles_rad = np.deg2rad(angles_deg)
+
+    S21_all = []
+    for angle in angles_deg:
+        freq, _, S21, _, _ = readout_s2p(str(angle))
+        S21_all.append(S21)
+
+    S21_all = np.array(S21_all) 
+
+    D = []
+    for f_idx in range(len(freq)):
+        P = np.abs(S21_all[:, f_idx])**2
+        P_max = np.max(P)
+        integral = np.trapezoid(P * np.sin(angles_rad), angles_rad)
+
+        D_f = 2 * P_max / integral 
+        D.append(D_f)
+
+    D = np.array(D)
+    D_dBi = 10 * np.log10(D)
+
+    plt.figure()
+    plt.plot(freq / 1e9, D_dBi)
+    plt.xlabel("Frequency (GHz)")
+    plt.ylabel("Directivity (dBi)")
+    plt.title("Directivity vs Frequency")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
 
 if __name__ == "__main__":
     #task1()
-    task2()
-    #task3()
+    #task2()
+    task3()
     pass

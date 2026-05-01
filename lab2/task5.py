@@ -49,9 +49,8 @@ freq_100, gain_100 = get_gain(1.00,"measurements/Practicum2-1m/0.s2p")
 
 freq_050, gain_050 = get_gain(0.5,"measurements/Practicum2-0.5m/0.s2p")
 
-
-plt.plot(freq_100/1e9,10*np.log10(gain_100),label="1m")
 plt.plot(freq_138/1e9,10*np.log10(gain_138),label="1.38m")
+plt.plot(freq_100/1e9,10*np.log10(gain_100),label="1m")
 plt.plot(freq_050/1e9,10*np.log10(gain_050),label="0.5m")
 
 plt.xlabel("Freq (GHz)")
