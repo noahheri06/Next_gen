@@ -75,15 +75,25 @@ print(R)
 
 #D
 
-
 efficiencies = [1, 0.8, 0.5]
 Ap = [8.86e-2, 6.5e-2]
 
+fig, axes = plt.subplots(2, 3, figsize=(15, 8), sharex=True, sharey=True)
 for i in range(2):
     for j in range(3):
-        Ae = efficiencies[j]*Ap[i]
-        d = (4*np.pi*Ae)/(lambda_range**2)
-        plt.plot(freq_range, d)
-        plt.title(f"directitty at area = {Ae}, vs freq")
-        plt.show()
+        Ae = efficiencies[j] * Ap[i]
+        d = (4 * np.pi * Ae) / (lambda_range**2)
+
+        ax = axes[i, j]
+        ax.plot(freq_range, 10 * np.log10(d))
+
+        ax.set_title(f"Ae={Ae:.3e}")
+        ax.grid()
+
+# Shared labels
+fig.supxlabel("Frequency")
+fig.supylabel("Directivity")
+
+plt.tight_layout()
+plt.show()
 
