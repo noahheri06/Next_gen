@@ -1,17 +1,26 @@
 import numpy as np
-pp = [][]
-for i in range(46):
-    # print(i)
-    freq, S11, S21, S12, S22 = readout_s2p(f'{i*2}')
-    #find correct indexis
+pp = []
+angles = np.linspace(-90, 90, 91)
+
+for j in range(402):
     p = []
-    for j in range(len(freq)):
+    for i in range(46):
+        # print(i)
+        freq, S11, S21, S12, S22 = readout_s2p(f'{i*2}')
+        #find correct indexis
+        
         db = 10*np.log10(np.abs(S21)**2)
         if(i==0):
             p.append(db[j])
         else:
             p.append(db[j])
             p.insert(0, db[j])
+    #print(angles)
+    max = np.max(p)
+    p = p - max
+    plt.plot(angles, p)
+    
+    pp.append(p)
     
 
     
