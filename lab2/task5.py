@@ -68,7 +68,7 @@ ax1.plot(freq_050/1e9,10*np.log10(gain_050),label="0.5m")
 
 ax2 = ax1.twinx()
 ax2.plot(freq_138/1e9,R,"--",label="Far field distance")
-ax2.set_xlabel("Distance (m)")
+ax2.set_ylabel("Distance (m)")
 
 ax1.set_xlabel("Freq (GHz)")
 ax1.set_ylabel("Gain (dB)")
