@@ -37,27 +37,46 @@ def get_gain(dist,file):
 
 
 
-# =============================================================================
-# 1 meter
-# =============================================================================
-
-
-
+# voor elke afstand
 freq_138,gain_138 = get_gain(1.38,"measurements/Practicum2-1.38m/0.s2p")
 
 freq_100, gain_100 = get_gain(1.00,"measurements/Practicum2-1m/0.s2p")
 
 freq_050, gain_050 = get_gain(0.5,"measurements/Practicum2-0.5m/0.s2p")
 
-plt.plot(freq_138/1e9,10*np.log10(gain_138),label="1.38m")
-plt.plot(freq_100/1e9,10*np.log10(gain_100),label="1m")
-plt.plot(freq_050/1e9,10*np.log10(gain_050),label="0.5m")
 
-plt.xlabel("Freq (GHz)")
-plt.ylabel("Gain (dB)")
-plt.title("Gain per frequency")
-plt.grid()
-plt.legend()
+# far field distance
+
+lx = 8.86e-2
+ly = 6.5e-2
+D = lx # (lx**2+ly**2)**0.5
+
+lambd = 3e8/freq_138
+R = 2*D**2/lambd
+
+
+
+fig, ax1 = plt.subplots()
+
+
+
+
+ax1.plot(freq_138/1e9,10*np.log10(gain_138),label="1.38m")
+ax1.plot(freq_100/1e9,10*np.log10(gain_100),label="1m")
+ax1.plot(freq_050/1e9,10*np.log10(gain_050),label="0.5m")
+
+
+ax2 = ax1.twinx()
+ax2.plot(freq_138/1e9,R,"--",label="Far field distance")
+ax2.set_xlabel("Distance (m)")
+
+ax1.set_xlabel("Freq (GHz)")
+ax1.set_ylabel("Gain (dB)")
+ax1.set_title("Gain per frequency")
+ax1.grid()
+ax1.legend()
+ax2.legend(loc=4)
+
 
 plt.show()
 plt.savefig("plots/task5.png", dpi=500)
