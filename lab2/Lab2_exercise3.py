@@ -12,7 +12,7 @@ theta = np.linspace(-np.pi, np.pi, 2000)
 
 # Dimensions
 lx = 8.86e-2
-ly = 6.6e-2
+ly = 6.5e-2
 
 # Planes (phi values)
 planes = [0, np.pi/2]
@@ -76,7 +76,7 @@ print(R)
 #D
 
 efficiencies = [1, 0.8, 0.5]
-Ap = [8.86e-2, 6.5e-2]
+Ap = [np.pi/4 * 8.86e-2**2, np.pi/4 * 6.5e-2**2]
 
 fig, axes = plt.subplots(2, 3, figsize=(15, 8), sharex=True, sharey=True)
 for i in range(2):
