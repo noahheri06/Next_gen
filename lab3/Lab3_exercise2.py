@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
+from math import floor
 
 
 c=3e8
@@ -12,7 +13,9 @@ dy = lambd/2
 
 
 
-
+# =============================================================================
+# 3D PLOT
+# =============================================================================
 
 phi = np.linspace(0,np.pi,300)
 theta = np.linspace(-np.pi,np.pi,300)
@@ -53,12 +56,109 @@ fig = plt.figure()
 ax = fig.add_subplot(projection='3d')
 
 ax.plot_surface(X,Y,Z, facecolors = colors)
-# ax.set_xlim(-1.01, 1.01)
-# ax.set_ylim(-1.01, 1.01)
+
 ax.set_xlabel("x")
 ax.set_ylabel("y")
 ax.set_zlabel("z")
 ax.set_title("Array Factor")
+
 plt.grid()
 plt.show()
+
+
+# =============================================================================
+# 2D CUTS
+# =============================================================================
+
+
+
+phi = np.array([0,np.pi/2])
+theta = np.linspace(-np.pi,np.pi,10000)
+
+THETA,PHI = np.meshgrid(theta,phi)
+AF = np.zeros(np.shape(THETA))
+
+for n in range(8):
+    
+    kvect = k0*np.array([np.sin(THETA)*np.cos(PHI), np.sin(THETA)*np.sin(PHI), np.cos(THETA)])
+    
+    rvect = np.array([0,dy*n,0])
+    
+    kdotr = kvect[0]*rvect[0]+kvect[1]*rvect[1]+kvect[2]*rvect[2]
+    
+    AF = AF + np.e**(1j*kdotr)
+    
+    
+    #AF += np.e**(1j*n*dy*k0*np.sin(theta)*np.sin(phi))
+
+AF_mag = np.abs(AF)
+
+AF_norm = AF_mag/np.max(AF_mag)
+    
+AF_zerophi = AF_norm[0]
+AF_90phi = AF_norm[1]
+
+
+colors = cm.jet(AF_norm)
+
+
+fig = plt.figure()
+ax = fig.add_subplot()
+
+ax.plot(np.rad2deg(theta),20*np.log10(AF_zerophi),label="$\phi$ = 0*")
+ax.plot(np.rad2deg(theta),20*np.log10(AF_90phi),label="$\phi$ = 90*")
+
+
+ax.set_xlabel("$\theta$ (rad)")
+ax.set_ylabel("normalized AF (dB)")
+
+ax.set_title("Array Factor")
+ax.legend()
+plt.grid()
+plt.show()
+
+
+
+# =============================================================================
+# HALF POWER BANDWIDTH
+# =============================================================================
+
+power_zerophi = AF_zerophi**2
+power_90phi = AF_90phi**2
+
+ind_zerophi = np.where(power_zerophi>0.5)[0]
+ind_90phi = np.where(power_90phi>0.5)[0]
+
+# for phi = 90
+splits = np.where(np.diff(ind_90phi) !=1)[0] + 1
+groups = np.split(ind_90phi,splits)
+
+middlebeam = groups[floor(len(groups)/2)]
+
+beamwidth90 = theta[middlebeam[-1]]-theta[middlebeam[0]]
+beamwidth90 = np.rad2deg(beamwidth90)
+
+
+# for phi = 0
+splits = np.where(np.diff(ind_zerophi) !=1)[0] + 1
+groups = np.split(ind_zerophi,splits)
+
+middlebeam = groups[floor(len(groups)/2)]
+
+beamwidthzero = theta[middlebeam[-1]]-theta[middlebeam[0]]
+beamwidthzero = np.rad2deg(beamwidthzero)
+
+
+print(f"The beamwidth in the phi=90 plane is {beamwidth90} deg")
+print(f"The beamwidth in the phi=0 plane is {beamwidthzero} deg")
+
+D = 4*np.pi*(180/np.pi)**2 / (beamwidthzero*beamwidth90)
+
+print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.log10(D),4)} dB")
+
+
+
+
+
+
 
