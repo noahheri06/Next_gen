@@ -145,7 +145,7 @@ def plot_2d_cuts(func,*args,plot=True,**kwargs):
         title = kwargs["title"]
         kwargs.pop("title")
     # array factor
-    result = func(*args[:2],THETA,PHI,*args[2:],**kwargs)
+    result = func(*args[:2],PHI,THETA,*args[2:],**kwargs)
     # split in zero and 90  
     res_zerophi,res_90phi = result
     

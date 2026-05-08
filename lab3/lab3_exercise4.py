@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from math import floor
 from scipy.signal import find_peaks
-
+from Lab3_exercise2 import *
 
     
 
@@ -13,44 +13,37 @@ f = 15e9
 lambd = c/f
 k0 = 2*np.pi/lambd
 dy = lambd/2
-
-def plot_pattern3D(pattern,THETA,PHI,title=""):
+LOW_RES = 1000
+HIGH_RES = 10000
     
-    R = pattern
-
-    X = R * np.sin(THETA)*np.cos(PHI)
-    Y = R * np.sin(THETA)*np.sin(PHI)
-    Z = R * np.cos(THETA)
-
-    colors = cm.jet(pattern)
-
-
-    fig = plt.figure()
-    ax = fig.add_subplot(projection='3d')
-
-    ax.plot_surface(X,Y,Z, facecolors = colors)
-
-    ax.set_xlabel("x")
-    ax.set_ylabel("y")
-    ax.set_zlabel("z")
-    ax.set_title(title)
-
-    plt.grid()
-    plt.show()
+def array_factor_taper(dy,dx,PHI,THETA,taper,N,M=1,resolution=LOW_RES):
     
-def get_beamwidth(pattern,theta):
-    power = pattern**2
-    ind_above_halfpower = np.where(power>0.5)[0]
-    splits = np.where(np.diff(ind_above_halfpower) !=1)[0] + 1
-    groups = np.split(ind_above_halfpower,splits)
-
-    middlebeam = groups[floor(len(groups)/2)]
-
-    bw = theta[middlebeam[-1]]-theta[middlebeam[0]]
-    bw = np.rad2deg(bw)
+    AF = np.zeros(np.shape(THETA))
     
-    return(bw)
     
+    # ARRAY
+    for m in range(M):
+        for n in range(N):
+        
+            kvect = k0*np.array([np.sin(THETA)*np.cos(PHI), np.sin(THETA)*np.sin(PHI), np.cos(THETA)])
+            
+            rvect = np.array([dx*m,dy*n,0])
+            
+            kdotr = kvect[0]*rvect[0]+kvect[1]*rvect[1]+kvect[2]*rvect[2]
+            
+            
+            # niet heel goed maar t werkt
+            if M==1:
+                AF = AF + taper_coef[n] * np.e**(1j*kdotr)
+            else:
+                AF = AF + taper_coef[n][m] * np.e**(1j*kdotr)
+
+    AF_mag = np.abs(AF)
+    AF_norm = AF_mag/np.max(AF_mag)
+    
+    return(AF_norm)
+
+
 
 # =============================================================================
 # A
@@ -62,30 +55,17 @@ att = 45
 # taper coefficients
 taper_coef = chebwin(N, att)
 #taper_coef = 8*[1]
+
 print("Amplitude weights:",taper_coef)
 
-phi = np.linspace(0,np.pi,1000)
-theta = np.linspace(-np.pi,np.pi,1000)
+phi = np.linspace(-np.pi,np.pi,1000)
+theta = np.linspace(0,np.pi,1000)
 
 THETA,PHI = np.meshgrid(theta,phi)
 
 
-AF = np.zeros(np.shape(THETA))
 
-for n in range(8):
-    
-    kvect = k0*np.array([np.sin(THETA)*np.cos(PHI), np.sin(THETA)*np.sin(PHI), np.cos(THETA)])
-    
-    rvect = np.array([0,dy*n,0])
-    
-    kdotr = kvect[0]*rvect[0]+kvect[1]*rvect[1]+kvect[2]*rvect[2]
-    
-    AF = AF + taper_coef[n] * np.e**(1j*kdotr)
-    
-
-AF_mag = np.abs(AF)
-
-AF_norm = AF_mag/np.max(AF_mag)
+AF_norm = array_factor_taper(dy,0,PHI,THETA,taper_coef,N)
 
 plot_pattern3D(AF_norm, THETA, PHI, title="8x1 array")
 
@@ -94,30 +74,11 @@ plot_pattern3D(AF_norm, THETA, PHI, title="8x1 array")
 
 
 # 2D PLOTS
-phi = [0,np.pi/2]
-theta = np.linspace(-np.pi,np.pi,10000)
 
-THETA,PHI = np.meshgrid(theta,phi)
+theta = np.linspace(-np.pi/2,np.pi/2,HIGH_RES)
 
+fig,ax,AF_zerophi,AF_90phi = plot_2d_cuts(array_factor_taper, dy,0,taper_coef,N)
 
-AF = np.zeros(np.shape(THETA))
-
-for n in range(8):
-    
-    kvect = k0*np.array([np.sin(THETA)*np.cos(PHI), np.sin(THETA)*np.sin(PHI), np.cos(THETA)])
-    
-    rvect = np.array([0,dy*n,0])
-    
-    kdotr = kvect[0]*rvect[0]+kvect[1]*rvect[1]+kvect[2]*rvect[2]
-    
-    AF = AF + taper_coef[n] * np.e**(1j*kdotr)
-
-AF_mag = np.abs(AF)
-
-AF_normcuts = AF_mag/np.max(AF_mag)
-    
-AF_zerophi = AF_normcuts[0]
-AF_90phi = AF_normcuts[1]
 
 AF_zerophi_dB = 20*np.log10(AF_zerophi)
 AF_90phi_dB = 20*np.log10(AF_90phi)
@@ -128,19 +89,7 @@ heights = prop["peak_heights"]
 max_sidelobe = np.max(np.delete(heights,np.argmax(heights)))
 print(f"The maximum sidelobe level is {round(max_sidelobe,4)} dB")
 
-fig = plt.figure()
-ax = fig.add_subplot()
-
-ax.plot(np.rad2deg(theta),AF_zerophi_dB,label="$\phi$ = 0$\degree$")
-ax.plot(np.rad2deg(theta),AF_90phi_dB,label="$\phi$ = 90$\degree$")
-
-ax.set_xlabel("$\theta$ (rad)")
-ax.set_ylabel("normalized AF (dB)")
-
-ax.set_title("Array Factor")
-ax.legend()
-plt.grid()
-plt.show()
+ax.set_title("Array Factor (8x1 tapered)")
 
 
 beamwidth90 = get_beamwidth(AF_90phi,theta)
@@ -186,60 +135,18 @@ theta = np.linspace(-np.pi,np.pi,1000)
 THETA,PHI = np.meshgrid(theta,phi)
 
 
-AF = np.zeros(np.shape(THETA))
-
-for n in range(N):
-    for m in range(M):
-    
-        kvect = k0*np.array([np.sin(THETA)*np.cos(PHI), np.sin(THETA)*np.sin(PHI), np.cos(THETA)])
-        
-        rvect = np.array([dx*m,dy*n,0])
-        
-        kdotr = kvect[0]*rvect[0]+kvect[1]*rvect[1]+kvect[2]*rvect[2]
-        
-        AF = AF + taper_coef[n][m] * np.e**(1j*kdotr)
-        
-
-AF_mag = np.abs(AF)
-
-AF_norm = AF_mag/np.max(AF_mag)
+AF_norm = array_factor_taper(dy, dx, PHI, THETA, taper_coef, N,M=M)
 
 plot_pattern3D(AF_norm, THETA, PHI, title="8x8 array")
 
 
 
-
-
-
-
-
 # 2D PLOTS
-phi = [0,np.pi/2]
-theta = np.linspace(-np.pi,np.pi,10000)
 
-THETA,PHI = np.meshgrid(theta,phi)
+theta = np.linspace(-np.pi/2,np.pi/2,HIGH_RES)
 
+fig,ax,AF_zerophi,AF_90phi = plot_2d_cuts(array_factor_taper, dy,dx,taper_coef,N,M=M)
 
-AF = np.zeros(np.shape(THETA))
-
-for n in range(N):
-    for m in range(M):
-    
-        kvect = k0*np.array([np.sin(THETA)*np.cos(PHI), np.sin(THETA)*np.sin(PHI), np.cos(THETA)])
-        
-        rvect = np.array([dx*m,dy*n,0])
-        
-        kdotr = kvect[0]*rvect[0]+kvect[1]*rvect[1]+kvect[2]*rvect[2]
-        
-        AF = AF + taper_coef[n][m] * np.e**(1j*kdotr)
-        
-        
-AF_mag = np.abs(AF)
-
-AF_normcuts = AF_mag/np.max(AF_mag)
-    
-AF_zerophi = AF_normcuts[0]
-AF_90phi = AF_normcuts[1]
 
 AF_zerophi_dB = 20*np.log10(AF_zerophi)
 AF_90phi_dB = 20*np.log10(AF_90phi)
@@ -250,19 +157,8 @@ heights = prop["peak_heights"]
 max_sidelobe = np.max(np.delete(heights,np.argmax(heights)))
 print(f"The maximum sidelobe level is {round(max_sidelobe,4)} dB")
 
-fig = plt.figure()
-ax = fig.add_subplot()
 
-ax.plot(np.rad2deg(theta),AF_zerophi_dB,label="$\phi$ = 0$\degree$")
-ax.plot(np.rad2deg(theta),AF_90phi_dB,label="$\phi$ = 90$\degree$")
-
-ax.set_xlabel("$\theta$ (rad)")
-ax.set_ylabel("normalized AF (dB)")
-
-ax.set_title("Array Factor")
-ax.legend()
-plt.grid()
-plt.show()
+ax.set_title("Array Factor (8x8 tapered)")
 
 
 beamwidth90 = get_beamwidth(AF_90phi,theta)
