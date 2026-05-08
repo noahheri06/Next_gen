@@ -42,6 +42,10 @@ def plot_pattern3D(pattern,THETA,PHI,title=""):
     ax.set_xlabel("x")
     ax.set_ylabel("y")
     ax.set_zlabel("z")
+    ax.set_xlim(-1.01,1.01)
+    ax.set_ylim(-1.01,1.01)
+    ax.set_zlim(0,2.02)
+    
     ax.set_title(title)
 
     plt.grid()
@@ -112,8 +116,11 @@ def get_beamwidth(pattern,theta):
     ind_above_halfpower = np.where(power>0.5)[0]
     splits = np.where(np.diff(ind_above_halfpower) !=1)[0] + 1
     groups = np.split(ind_above_halfpower,splits)
-
+    
+    
+    
     middlebeam = groups[floor(len(groups)/2)]
+    
 
     bw = theta[middlebeam[-1]]-theta[middlebeam[0]]
     bw = np.rad2deg(bw)
@@ -128,8 +135,41 @@ def calc_sidelobelevel(pattern):
 
 
 
-
-
+def plot_2d_cuts(func,*args,plot=True,**kwargs):
+    phi = np.array([0,np.pi/2])
+    theta = np.linspace(-np.pi/2,np.pi/2,HIGH_RES)
+    THETA,PHI = np.meshgrid(theta,phi)
+    
+    title=None
+    if "title" in kwargs.keys():
+        title = kwargs["title"]
+        kwargs.pop("title")
+    # array factor
+    result = func(*args[:2],THETA,PHI,*args[2:],**kwargs)
+    # split in zero and 90  
+    res_zerophi,res_90phi = result
+    
+    res_zerophi_dB = 20*np.log10(res_zerophi)
+    res_90phi_dB = 20*np.log10(res_90phi)
+    
+    if plot:
+        fig = plt.figure()
+        ax = fig.add_subplot()
+    
+        ax.plot(np.rad2deg(theta),res_zerophi_dB,label="$\phi$ = 0$\degree$")
+        ax.plot(np.rad2deg(theta),res_90phi_dB,label="$\phi$ = 90$\degree$")
+    
+        ax.set_ylim(-70,5)
+        ax.set_xlabel("$\\theta$ (deg)")
+        ax.set_ylabel("normalized AF (dB)")
+        
+        if title!=None:
+            ax.set_title(title)
+        ax.legend()
+        plt.grid()
+        plt.show()
+        return(fig,ax,res_zerophi,res_90phi)
+    return(res_zerophi,res_90phi)
 
 
 
@@ -187,7 +227,7 @@ def lab3_ex2a():
     ax.plot(np.rad2deg(theta),AF_90phi_dB,label="$\phi$ = 90$\degree$")
 
     ax.set_ylim(-70,5)
-    ax.set_xlabel("$\theta$ (rad)")
+    ax.set_xlabel("$\theta$ (deg)")
     ax.set_ylabel("normalized AF (dB)")
 
     ax.set_title("Array Factor")
@@ -208,7 +248,7 @@ def lab3_ex2b():
     W = 6.5e-3
     
     
-    theta = np.linspace(0, np.pi, LOW_RES)
+    theta = np.linspace(0, np.pi/2, LOW_RES)
     phi = np.linspace(-np.pi, np.pi, LOW_RES)
     THETA, PHI = np.meshgrid(theta, phi)
     
@@ -216,16 +256,13 @@ def lab3_ex2b():
     pattern_norm = patch_antenna(L,W,THETA,PHI)
     
     # plotting
-    plot_pattern3D(pattern_norm,THETA,PHI)
+    # 3D
+    plot_pattern3D(pattern_norm,THETA,PHI,title="Patch antenna radiation pattern")
+    # 2D
+    fig,ax,pattern_zerophi,pattern_90phi = plot_2d_cuts(patch_antenna,L,W,title="Patch antenna radiation pattern")
+    ax.set_ylabel("normalized gain (dB)")
     
-    # calculate beamwidth
-    theta = np.linspace(0, np.pi, HIGH_RES)
-    phi = [0,np.pi/2]
-    THETA, PHI = np.meshgrid(theta, phi)
-    
-    # calc pattern and split in zero and 90 phi
-    pattern_zerophi, pattern_90phi = patch_antenna(L,W,THETA,PHI)
-    
+    theta = np.linspace(-np.pi/2, np.pi/2, HIGH_RES)
     # calc bandwidth
     bwzero = get_beamwidth(pattern_zerophi,theta)
     bw90 = get_beamwidth(pattern_90phi,theta)
@@ -245,7 +282,7 @@ def lab3_ex2c():
     print("C")
     L,W = 5e-3,6.5e-3
     
-    theta = np.linspace(0, np.pi, LOW_RES)
+    theta = np.linspace(-np.pi/2, np.pi/2, LOW_RES)
     phi = np.linspace(-np.pi, np.pi, LOW_RES)
     THETA, PHI = np.meshgrid(theta, phi)
     
@@ -262,12 +299,16 @@ def lab3_ex2c():
 
 
     # 2D cuts
-    theta = np.linspace(0, np.pi, HIGH_RES)
+    theta = np.linspace(-np.pi, np.pi, HIGH_RES)
     phi = [0,np.pi/2]
     THETA, PHI = np.meshgrid(theta, phi)
     
-    e_zerophi, e_90phi = patch_antenna(L,W,THETA,PHI)
-    af_zerophi, af_90phi = array_factor(dy,0,THETA,PHI,8)
+    # element factor
+    fig,ax,e_zerophi,e_90phi = plot_2d_cuts(patch_antenna,L,W,title="Patch antenna radiation pattern")
+    ax.set_ylabel("normalized gain (dB)")
+    # array factor
+    fig,ax,af_zerophi,af_90phi = plot_2d_cuts(array_factor,dy,0,8,title="Array factor (8x1)")
+    ax.set_ylabel("normalized AF (dB)")
     
     
     total_zerophi = e_zerophi * af_zerophi
@@ -295,8 +336,8 @@ def lab3_ex2d():
     L,W = 5e-3,6.5e-3
     dx=dy
 
-    phi = np.linspace(0,np.pi,LOW_RES)
-    theta = np.linspace(-np.pi,np.pi,LOW_RES)
+    phi = np.linspace(-np.pi,np.pi,LOW_RES)
+    theta = np.linspace(-np.pi/2,np.pi/2,LOW_RES)
 
     THETA,PHI = np.meshgrid(theta,phi)
 
@@ -308,19 +349,20 @@ def lab3_ex2d():
         
     total_pattern = AF_norm * element_pattern_norm
     # PLOTTING
-    plot_pattern3D(total_pattern, THETA, PHI)
+    plot_pattern3D(total_pattern, THETA, PHI,title="Antenna factor (8x8)")
 
 
     # CALCULATING DIRECTIVITY
     # only use two phi's
     phi = np.array([0,np.pi/2])
-    theta = np.linspace(-np.pi,np.pi,HIGH_RES)
+    theta = np.linspace(-np.pi/2,np.pi/2,HIGH_RES)
     THETA,PHI = np.meshgrid(theta,phi)
     
     # array factor
     AF_norm = array_factor(dy, dx, PHI, THETA, N, M=M)
     # split in zero and 90  
     AF_zerophi,AF_90phi = AF_norm
+
 
     # element pattern
     element_pattern_norm = patch_antenna(L,W,THETA,PHI)
@@ -330,7 +372,9 @@ def lab3_ex2d():
     
     total_zerophi = AF_zerophi * pattern_zerophi
     total_90phi = AF_90phi * pattern_90phi
-
+    
+    
+    
     # calc beamwidth
     beamwidth90 = get_beamwidth(total_90phi, theta)
     beamwidthzero = get_beamwidth(total_zerophi, theta)
