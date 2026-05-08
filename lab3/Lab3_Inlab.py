@@ -136,8 +136,7 @@ def compare(gain, D):
    print(f"The efficiency is equal to {efficiency}")
    return efficiency
 
-def array_plotter(freq, symtrec = True):
-    index = np.where(freq == 15e9) ##operating frequency
+def array_plotter(op_frequencie, symtrec = True):
 
     p =[]
 
@@ -145,6 +144,7 @@ def array_plotter(freq, symtrec = True):
         for i in range(46):
             # print(i)
             freq, S11, S21, S12, S22 = readout_s2p(f'{i*2}') #get correct name
+            index = np.where(freq == op_frequencie) ##operating frequency
             #find correct indexis
 
 
@@ -160,8 +160,9 @@ def array_plotter(freq, symtrec = True):
 
             # print(i)
             freq, S11, S21, S12, S22 = readout_s2p(f'{(i-45)*2}') #get correct name
+            index = np.where(freq == op_frequencie) ##operating frequency
             #find correct indexis
-    
+
             db = 10*np.log10(np.abs(S21)**2)
             p.append(db[index])
     
