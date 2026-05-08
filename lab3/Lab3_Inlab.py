@@ -3,7 +3,7 @@
 # a = 6.8 cm
 # 
 # c = 10.4 cm
-#
+# d = 21.7 cm
 import numpy as np
 import skrf as rf
 import matplotlib.pyplot as plt
@@ -16,7 +16,7 @@ R = 1,43
 
 def readout_s2p(your_file):
 
-  ntwk = rf.Network(your_file)
+  ntwk = rf.Network(f'lab3/measurements/{your_file}.s2p')
 
   # Frequency (Hz)
   freq = ntwk.f
@@ -156,17 +156,17 @@ def array_plotter(op_frequencie, symtrec = True):
                 p.append(db[index])
                 p.insert(0, db[index])
     else: 
-        for i in range(91):
+        for i in range(71):
 
             # print(i)
-            freq, S11, S21, S12, S22 = readout_s2p(f'{(i-45)*2}') #get correct name
+            freq, S11, S21, S12, S22 = readout_s2p(f'1x8ap{(i-35)*2}') #get correct name
             index = np.where(freq == op_frequencie) ##operating frequency
             #find correct indexis
 
             db = 10*np.log10(np.abs(S21)**2)
             p.append(db[index])
     
-    angles = np.linspace(-90, 90, 91)
+    angles = np.linspace(-70, 70, 71)
     plt.plot(angles, p, label='15 GHz')
     plt.title("S21 parameter vs angle")
     plt.grid()
@@ -181,6 +181,6 @@ def array_plotter(op_frequencie, symtrec = True):
     print(f"the max angle is {anglemax}")
 
 
-
+array_plotter(15e9, False)
 
 #S11**2 = p_ref/p_in
