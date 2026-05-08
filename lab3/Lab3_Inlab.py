@@ -1,4 +1,9 @@
 #afstand is 1.43
+#distance between patches (middle to middle):
+# a = 6.8 cm
+# 
+# c = 10.4 cm
+#
 import numpy as np
 import skrf as rf
 import matplotlib.pyplot as plt
@@ -6,6 +11,8 @@ Z0 = 50
 C = 3e8
 R = 1,43
 #task1
+
+
 
 def readout_s2p(your_file):
 
@@ -129,26 +136,48 @@ def compare(gain, D):
    print(f"The efficiency is equal to {efficiency}")
    return efficiency
 
-def array_plotter(freq):
-    index = np.where(freq = 15e9) ##operating frequency
+def array_plotter(freq, symtrec = True):
+    index = np.where(freq == 15e9) ##operating frequency
 
     p =[]
 
-    for i in range(46):
-        # print(i)
-        freq, S11, S21, S12, S22 = readout_s2p(f'{i*2}') #get correct name
-        #find correct indexis
+    if(symtrec):
+        for i in range(46):
+            # print(i)
+            freq, S11, S21, S12, S22 = readout_s2p(f'{i*2}') #get correct name
+            #find correct indexis
 
 
-        db = 10*np.log10(np.abs(S21)**2)
+            db = 10*np.log10(np.abs(S21)**2)
 
-        if(i==0):
+            if(i==0):
+                p.append(db[index])
+            else:
+                p.append(db[index])
+                p.insert(0, db[index])
+    else: 
+        for i in range(91):
+
+            # print(i)
+            freq, S11, S21, S12, S22 = readout_s2p(f'{(i-45)*2}') #get correct name
+            #find correct indexis
+    
+            db = 10*np.log10(np.abs(S21)**2)
             p.append(db[index])
-        else:
-            p.append(db[index])
-            p.insert(0, db[index])
+    
+    angles = np.linspace(-90, 90, 91)
+    plt.plot(angles, p, label='15 GHz')
+    plt.title("S21 parameter vs angle")
+    plt.grid()
+    plt.xlabel("angle (degrees)")
+    plt.ylabel("Magnitude (dB)")
+    plt.legend()
+    plt.savefig("lab3/plots/powerplot.png")
+    plt.show()
 
-        
+    indexmax = np.where(p == np.max(p))
+    anglemax = angles[indexmax]
+    print(f"the max angle is {anglemax}")
 
 
 
