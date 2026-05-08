@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from math import floor
-
+from scipy.signal import find_peaks
 
 c=3e8
 f = 15e9
@@ -21,7 +21,7 @@ def plot_pattern3D(pattern,THETA,PHI,title=""):
     Y = R * np.sin(THETA)*np.sin(PHI)
     Z = R * np.cos(THETA)
 
-    colors = cm.jet(AF_norm)
+    colors = cm.jet(pattern)
 
 
     fig = plt.figure()
@@ -43,7 +43,7 @@ def plot_pattern3D(pattern,THETA,PHI,title=""):
 # A
 # =============================================================================
 
-
+print("A")
 # =============================================================================
 # 3D PLOT
 # =============================================================================
@@ -74,28 +74,9 @@ AF_mag = np.abs(AF)
 AF_norm = AF_mag/np.max(AF_mag)
     
 
-R = AF_norm
+R = AF_norm # 20*np.log10(np.where(AF_norm>1e-6,AF_norm,1e-6))+121
 
-X = R * np.sin(THETA)*np.cos(PHI)
-Y = R * np.sin(THETA)*np.sin(PHI)
-Z = R * np.cos(THETA)
-
-colors = cm.jet(AF_norm)
-
-
-fig = plt.figure()
-ax = fig.add_subplot(projection='3d')
-
-ax.plot_surface(X,Y,Z, facecolors = colors)
-
-ax.set_xlabel("x")
-ax.set_ylabel("y")
-ax.set_zlabel("z")
-ax.set_title("Array Factor")
-
-plt.grid()
-plt.show()
-
+plot_pattern3D(AF_norm, THETA, PHI)
 
 # =============================================================================
 # 2D CUTS
@@ -129,15 +110,22 @@ AF_normcuts = AF_mag/np.max(AF_mag)
 AF_zerophi = AF_normcuts[0]
 AF_90phi = AF_normcuts[1]
 
+AF_zerophi_dB = 20*np.log10(AF_zerophi)
+AF_90phi_dB = 20*np.log10(AF_90phi)
 
-colors = cm.jet(AF_norm)
+
+
+peaks,prop = find_peaks(AF_90phi_dB,height=-100)
+heights = prop["peak_heights"]
+max_sidelobe = np.max(np.delete(heights,np.argmax(heights)))
+print(f"The maximum sidelobe level is {round(max_sidelobe,4)} dB")
 
 
 fig = plt.figure()
 ax = fig.add_subplot()
 
-ax.plot(np.rad2deg(theta),20*np.log10(AF_zerophi),label="$\phi$ = 0*")
-ax.plot(np.rad2deg(theta),20*np.log10(AF_90phi),label="$\phi$ = 90*")
+ax.plot(np.rad2deg(theta),AF_zerophi_dB,label="$\phi$ = 0$\degree$")
+ax.plot(np.rad2deg(theta),AF_90phi_dB,label="$\phi$ = 90$\degree$")
 
 
 ax.set_xlabel("$\theta$ (rad)")
@@ -189,6 +177,9 @@ print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.lo
 # =============================================================================
 # B
 # =============================================================================
+print(10*"-")
+print("B")
+
 
 # returns normalized patch antenna radiation pattern
 def patch_antenna(L,W,THETA,PHI):
@@ -245,7 +236,7 @@ bw90 = get_beamwidth(pattern_90phi,theta)
 #calc directivity
 D = 4*np.pi*(180/np.pi)**2 / (bwzero*bw90)
 
-print(10*"-")
+
 print("Patch antenna")
 print(f"The beamwidth in the phi=90 plane is {bw90} deg")
 print(f"The beamwidth in the phi=0 plane is {bwzero} deg")
@@ -260,6 +251,8 @@ print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.lo
 # =============================================================================
 # C
 # =============================================================================
+print(10*"-")
+print("C")
 
 total_norm = pattern_norm * AF_norm
 
@@ -282,7 +275,7 @@ bw90 = get_beamwidth(total_90phi,theta)
 #calc directivity
 D = 4*np.pi*(180/np.pi)**2 / (bwzero*bw90)
 
-print(10*"-")
+
 print("Total pattern")
 print(f"The beamwidth in the phi=90 plane is {bw90} deg")
 print(f"The beamwidth in the phi=0 plane is {bwzero} deg")
@@ -294,7 +287,8 @@ print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.lo
 # =============================================================================
 # D
 # =============================================================================
-
+print(10*"-")
+print("D")
 
 # 3D PLOT
 
