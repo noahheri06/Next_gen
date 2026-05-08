@@ -12,6 +12,13 @@ k0 = 2*np.pi/lambd
 dy = lambd/2
 
 
+LOW_RES = 1000
+HIGH_RES = 10000
+
+
+# =============================================================================
+# 3D Plot
+# =============================================================================
 
 def plot_pattern3D(pattern,THETA,PHI,title=""):
     
@@ -21,9 +28,12 @@ def plot_pattern3D(pattern,THETA,PHI,title=""):
     Y = R * np.sin(THETA)*np.sin(PHI)
     Z = R * np.cos(THETA)
 
-    colors = cm.jet(pattern)
-
-
+    
+    
+    c_sens = 15
+    pat_dB = 10*np.log10(pattern)
+    colors = cm.jet((pat_dB + c_sens)/c_sens)
+    
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
 
@@ -39,147 +49,48 @@ def plot_pattern3D(pattern,THETA,PHI,title=""):
 
 
 
-# =============================================================================
-# A
-# =============================================================================
 
-print("A")
-# =============================================================================
-# 3D PLOT
-# =============================================================================
-
-phi = np.linspace(0,np.pi,1000)
-theta = np.linspace(-np.pi,np.pi,1000)
-
-THETA,PHI = np.meshgrid(theta,phi)
-
-
-AF = np.zeros(np.shape(THETA))
-
-for n in range(8):
+def array_factor(dy,dx,PHI,THETA,N,M=1,resolution=LOW_RES):
     
-    kvect = k0*np.array([np.sin(THETA)*np.cos(PHI), np.sin(THETA)*np.sin(PHI), np.cos(THETA)])
+    AF = np.zeros(np.shape(THETA))
+
+    # ARRAY
+    for m in range(M):
+        for n in range(N):
+        
+            kvect = k0*np.array([np.sin(THETA)*np.cos(PHI), np.sin(THETA)*np.sin(PHI), np.cos(THETA)])
+            
+            rvect = np.array([dx*m,dy*n,0])
+            
+            kdotr = kvect[0]*rvect[0]+kvect[1]*rvect[1]+kvect[2]*rvect[2]
+            
+            AF = AF + np.e**(1j*kdotr)
+
+    AF_mag = np.abs(AF)
+    AF_norm = AF_mag/np.max(AF_mag)
     
-    rvect = np.array([0,dy*n,0])
+    return(AF_norm)
+
+def array_factor_single_phi(phi,dy,dx,PHI,THETA,N,M=1):
+
+    AF = np.zeros(np.shape(THETA))
+
+    # ARRAY
+    for m in range(M):
+        for n in range(N):
+        
+            kvect = k0*np.array([np.sin(THETA)*np.cos(PHI), np.sin(THETA)*np.sin(PHI), np.cos(THETA)])
+            
+            rvect = np.array([dx*m,dy*n,0])
+            
+            kdotr = kvect[0]*rvect[0]+kvect[1]*rvect[1]+kvect[2]*rvect[2]
+            
+            AF = AF + np.e**(1j*kdotr)
+
+    AF_mag = np.abs(AF)
+    AF_norm = AF_mag/np.max(AF_mag)
     
-    kdotr = kvect[0]*rvect[0]+kvect[1]*rvect[1]+kvect[2]*rvect[2]
-    
-    AF = AF + np.e**(1j*kdotr)
-    
-    
-    #AF += np.e**(1j*n*dy*k0*np.sin(theta)*np.sin(phi))
-
-AF_mag = np.abs(AF)
-
-AF_norm = AF_mag/np.max(AF_mag)
-    
-
-R = AF_norm # 20*np.log10(np.where(AF_norm>1e-6,AF_norm,1e-6))+121
-
-plot_pattern3D(AF_norm, THETA, PHI)
-
-# =============================================================================
-# 2D CUTS
-# =============================================================================
-
-
-
-phi = np.array([0,np.pi/2])
-theta = np.linspace(-np.pi,np.pi,10000)
-
-THETA,PHI = np.meshgrid(theta,phi)
-AF = np.zeros(np.shape(THETA))
-
-for n in range(8):
-    
-    kvect = k0*np.array([np.sin(THETA)*np.cos(PHI), np.sin(THETA)*np.sin(PHI), np.cos(THETA)])
-    
-    rvect = np.array([0,dy*n,0])
-    
-    kdotr = kvect[0]*rvect[0]+kvect[1]*rvect[1]+kvect[2]*rvect[2]
-    
-    AF = AF + np.e**(1j*kdotr)
-    
-    
-    #AF += np.e**(1j*n*dy*k0*np.sin(theta)*np.sin(phi))
-
-AF_mag = np.abs(AF)
-
-AF_normcuts = AF_mag/np.max(AF_mag)
-    
-AF_zerophi = AF_normcuts[0]
-AF_90phi = AF_normcuts[1]
-
-AF_zerophi_dB = 20*np.log10(AF_zerophi)
-AF_90phi_dB = 20*np.log10(AF_90phi)
-
-
-
-peaks,prop = find_peaks(AF_90phi_dB,height=-100)
-heights = prop["peak_heights"]
-max_sidelobe = np.max(np.delete(heights,np.argmax(heights)))
-print(f"The maximum sidelobe level is {round(max_sidelobe,4)} dB")
-
-
-fig = plt.figure()
-ax = fig.add_subplot()
-
-ax.plot(np.rad2deg(theta),AF_zerophi_dB,label="$\phi$ = 0$\degree$")
-ax.plot(np.rad2deg(theta),AF_90phi_dB,label="$\phi$ = 90$\degree$")
-
-
-ax.set_xlabel("$\theta$ (rad)")
-ax.set_ylabel("normalized AF (dB)")
-
-ax.set_title("Array Factor")
-ax.legend()
-plt.grid()
-plt.show()
-
-
-
-# =============================================================================
-# HALF POWER BANDWIDTH
-# =============================================================================
-
-def get_beamwidth(pattern,theta):
-    power = pattern**2
-    ind_above_halfpower = np.where(power>0.5)[0]
-    splits = np.where(np.diff(ind_above_halfpower) !=1)[0] + 1
-    groups = np.split(ind_above_halfpower,splits)
-
-    middlebeam = groups[floor(len(groups)/2)]
-
-    bw = theta[middlebeam[-1]]-theta[middlebeam[0]]
-    bw = np.rad2deg(bw)
-    
-    return(bw)
-    
-    
-
-
-beamwidth90 = get_beamwidth(AF_90phi,theta)
-
-
-beamwidthzero = get_beamwidth(AF_zerophi,theta)
-
-print("8 in a line")
-print(f"The beamwidth in the phi=90 plane is {beamwidth90} deg")
-print(f"The beamwidth in the phi=0 plane is {beamwidthzero} deg")
-
-D = 4*np.pi*(180/np.pi)**2 / (beamwidthzero*beamwidth90)
-
-print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.log10(D),4)} dB")
-
-
-
-#%%
-# =============================================================================
-# B
-# =============================================================================
-print(10*"-")
-print("B")
-
+    return(AF_norm[0])
 
 # returns normalized patch antenna radiation pattern
 def patch_antenna(L,W,THETA,PHI):
@@ -196,172 +107,253 @@ def patch_antenna(L,W,THETA,PHI):
     return(pattern_norm)
 
 
+def get_beamwidth(pattern,theta):
+    power = pattern**2
+    ind_above_halfpower = np.where(power>0.5)[0]
+    splits = np.where(np.diff(ind_above_halfpower) !=1)[0] + 1
+    groups = np.split(ind_above_halfpower,splits)
 
+    middlebeam = groups[floor(len(groups)/2)]
 
-L = 0.02
-W = 0.03
-
-er = 3.44
-tan_delta = 0.01
-h = 0.5e-3
-
-
-theta = np.linspace(0, np.pi, 1000)
-phi = np.linspace(-np.pi, np.pi, 1000)
-
-THETA, PHI = np.meshgrid(theta, phi)
+    bw = theta[middlebeam[-1]]-theta[middlebeam[0]]
+    bw = np.rad2deg(bw)
     
-pattern_norm = patch_antenna(L,W,THETA,PHI)
-
-
-# plotting
-plot_pattern3D(pattern_norm,THETA,PHI)
-
-
-# calculate beamwidth
-# calc for phi=0
-phi = 0
-THETA, PHI = np.meshgrid(theta, phi)
-pattern_zerophi = patch_antenna(L,W,THETA,PHI)[0]
-
-# calc for phi=90
-phi = 90
-THETA, PHI = np.meshgrid(theta, phi)
-pattern_90phi = patch_antenna(L,W,THETA,np.pi/2)[0]
-
-
-bwzero = get_beamwidth(pattern_zerophi,theta)
-bw90 = get_beamwidth(pattern_90phi,theta)
-
-#calc directivity
-D = 4*np.pi*(180/np.pi)**2 / (bwzero*bw90)
-
-
-print("Patch antenna")
-print(f"The beamwidth in the phi=90 plane is {bw90} deg")
-print(f"The beamwidth in the phi=0 plane is {bwzero} deg")
-print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.log10(D),4)} dB")
-
-
-
-
-
-#%%
-
-# =============================================================================
-# C
-# =============================================================================
-print(10*"-")
-print("C")
-
-total_norm = pattern_norm * AF_norm
-
-theta = np.linspace(0, np.pi, 1000)
-phi = np.linspace(-np.pi, np.pi, 1000)
-
-THETA, PHI = np.meshgrid(theta, phi)
-
-plot_pattern3D(total_norm, THETA, PHI)
-
-
-total_zerophi = AF_zerophi[::10] * pattern_zerophi
-total_90phi = AF_90phi[::10] * pattern_90phi
-
-
-
-bwzero = get_beamwidth(total_zerophi,theta)
-bw90 = get_beamwidth(total_90phi,theta)
-
-#calc directivity
-D = 4*np.pi*(180/np.pi)**2 / (bwzero*bw90)
-
-
-print("Total pattern")
-print(f"The beamwidth in the phi=90 plane is {bw90} deg")
-print(f"The beamwidth in the phi=0 plane is {bwzero} deg")
-print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.log10(D),4)} dB")
-
-
-#%%
-
-# =============================================================================
-# D
-# =============================================================================
-print(10*"-")
-print("D")
-
-# 3D PLOT
-
-dx=dy
-
-phi = np.linspace(0,np.pi,1000)
-theta = np.linspace(-np.pi,np.pi,1000)
-
-THETA,PHI = np.meshgrid(theta,phi)
-
-
-AF = np.zeros(np.shape(THETA))
-
-# 8x8 ARRAY
-for n in range(8):
-    for m in range(8):
+    return(bw)
     
-        kvect = k0*np.array([np.sin(THETA)*np.cos(PHI), np.sin(THETA)*np.sin(PHI), np.cos(THETA)])
-        
-        rvect = np.array([dx*m,dy*n,0])
-        
-        kdotr = kvect[0]*rvect[0]+kvect[1]*rvect[1]+kvect[2]*rvect[2]
-        
-        AF = AF + np.e**(1j*kdotr)
+def calc_sidelobelevel(pattern):
+    peaks,prop = find_peaks(pattern,height=-100)
+    heights = prop["peak_heights"]
+    max_sidelobe = np.max(np.delete(heights,np.argmax(heights)))
+    return(max_sidelobe)
 
-AF_mag = np.abs(AF)
-AF_norm = AF_mag/np.max(AF_mag)
+
+
+
+
+
+
+
+def lab3_ex2a():
+    print("A")
     
-total_pattern = AF_norm * pattern_norm
-# PLOTTING
-plot_pattern3D(total_pattern, THETA, PHI)
+    theta = np.linspace(0, np.pi, LOW_RES)
+    phi = np.linspace(-np.pi, np.pi, LOW_RES)
 
-
-# CALCULATING DIRECTIVITY
-
-phi = np.array([0,np.pi/2])
-theta = np.linspace(-np.pi,np.pi,10000)
-
-THETA,PHI = np.meshgrid(theta,phi)
-AF = np.zeros(np.shape(THETA))
-
-for n in range(8):
-    for m in range(8):
+    THETA, PHI = np.meshgrid(theta, phi)
     
-        kvect = k0*np.array([np.sin(THETA)*np.cos(PHI), np.sin(THETA)*np.sin(PHI), np.cos(THETA)])
-        
-        rvect = np.array([dx*m,dy*n,0])
-        
-        kdotr = kvect[0]*rvect[0]+kvect[1]*rvect[1]+kvect[2]*rvect[2]
-        
-        AF = AF + np.e**(1j*kdotr)
-
-AF_mag = np.abs(AF)
-
-AF_norm = AF_mag/np.max(AF_mag)
+    # 3D plot
+    AF_norm = array_factor(dy,0,THETA,PHI,8)
+    #AF_norm = AF_norm # 20*np.log10(np.where(AF_norm>1e-6,AF_norm,1e-6))+121
     
-AF_zerophi = AF_norm[0]
-AF_90phi = AF_norm[1]
+    plot_pattern3D(AF_norm, THETA, PHI,title="Array factor") 
+    
+     
+    # 2D cuts
+    theta = np.linspace(-np.pi/2, np.pi/2, HIGH_RES)
+    phi = [0,np.pi/2]
+    THETA, PHI = np.meshgrid(theta, phi)
+    
+    
+    AF_zerophi, AF_90phi = array_factor(dy,0,THETA,PHI,8)
+    
 
 
-total_zerophi = AF_zerophi[::10] * pattern_zerophi
-total_90phi = AF_90phi[::10] * pattern_90phi
+    AF_zerophi_dB = 20*np.log10(AF_zerophi)
+    AF_90phi_dB = 20*np.log10(AF_90phi)
 
-beamwidth90 = get_beamwidth(total_90phi, theta)
-beamwidthzero = get_beamwidth(total_zerophi, theta)
+    # calc parameters
+    max_sidelobe = calc_sidelobelevel(AF_90phi_dB)
+    print(f"The maximum sidelobe level is {round(max_sidelobe,4)} dB")
 
 
-print(10*"-")
-print("8x8 matrix")
-print(f"The beamwidth in the phi=90 plane is {beamwidth90} deg")
-print(f"The beamwidth in the phi=0 plane is {beamwidthzero} deg")
+    beamwidth90 = get_beamwidth(AF_90phi,theta)
 
-D = 4*np.pi*(180/np.pi)**2 / (beamwidthzero*beamwidth90)
+    beamwidthzero = get_beamwidth(AF_zerophi,theta)
 
-print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.log10(D),4)} dB")
+    print(f"The beamwidth in the phi=90 plane is {beamwidth90} deg")
+    print(f"The beamwidth in the phi=0 plane is {beamwidthzero} deg")
+
+    D = 4*np.pi*(180/np.pi)**2 / (beamwidthzero*beamwidth90)
+
+    print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.log10(D),4)} dB")
+
+
+
+    # actual plotting
+    fig = plt.figure()
+    ax = fig.add_subplot()
+
+    ax.plot(np.rad2deg(theta),AF_zerophi_dB,label="$\phi$ = 0$\degree$")
+    ax.plot(np.rad2deg(theta),AF_90phi_dB,label="$\phi$ = 90$\degree$")
+
+    ax.set_ylim(-70,5)
+    ax.set_xlabel("$\theta$ (rad)")
+    ax.set_ylabel("normalized AF (dB)")
+
+    ax.set_title("Array Factor")
+    ax.legend()
+    plt.grid()
+    plt.show()
+    
+    
+    
+    
+    
+def lab3_ex2b():
+    print(10*"-")
+    print("B")
+    
+    
+    L = 5e-3
+    W = 6.5e-3
+    
+    
+    theta = np.linspace(0, np.pi, LOW_RES)
+    phi = np.linspace(-np.pi, np.pi, LOW_RES)
+    THETA, PHI = np.meshgrid(theta, phi)
+    
+    # calc pattern
+    pattern_norm = patch_antenna(L,W,THETA,PHI)
+    
+    # plotting
+    plot_pattern3D(pattern_norm,THETA,PHI)
+    
+    # calculate beamwidth
+    theta = np.linspace(0, np.pi, HIGH_RES)
+    phi = [0,np.pi/2]
+    THETA, PHI = np.meshgrid(theta, phi)
+    
+    # calc pattern and split in zero and 90 phi
+    pattern_zerophi, pattern_90phi = patch_antenna(L,W,THETA,PHI)
+    
+    # calc bandwidth
+    bwzero = get_beamwidth(pattern_zerophi,theta)
+    bw90 = get_beamwidth(pattern_90phi,theta)
+    
+    #calc directivity
+    D = 4*np.pi*(180/np.pi)**2 / (bwzero*bw90)
+    
+    
+    print("Patch antenna")
+    print(f"The beamwidth in the phi=90 plane is {bw90} deg")
+    print(f"The beamwidth in the phi=0 plane is {bwzero} deg")
+    print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.log10(D),4)} dB")
+    
+    
+def lab3_ex2c():
+    print(10*"-")
+    print("C")
+    L,W = 5e-3,6.5e-3
+    
+    theta = np.linspace(0, np.pi, LOW_RES)
+    phi = np.linspace(-np.pi, np.pi, LOW_RES)
+    THETA, PHI = np.meshgrid(theta, phi)
+    
+    # calc pattern of element
+    element_pattern_norm = patch_antenna(L,W,THETA,PHI)
+    
+    # calc AF
+    AF_norm = array_factor(dy,0,THETA,PHI,8)
+    
+    total_norm = element_pattern_norm * AF_norm
+
+    # plot 3D
+    plot_pattern3D(total_norm, THETA, PHI)
+
+
+    # 2D cuts
+    theta = np.linspace(0, np.pi, HIGH_RES)
+    phi = [0,np.pi/2]
+    THETA, PHI = np.meshgrid(theta, phi)
+    
+    e_zerophi, e_90phi = patch_antenna(L,W,THETA,PHI)
+    af_zerophi, af_90phi = array_factor(dy,0,THETA,PHI,8)
+    
+    
+    total_zerophi = e_zerophi * af_zerophi
+    total_90phi = e_90phi * af_90phi
+    
+    # calc beamwidth
+    bwzero = get_beamwidth(total_zerophi,theta)
+    bw90 = get_beamwidth(total_90phi,theta)
+
+    #calc directivity
+    D = 4*np.pi*(180/np.pi)**2 / (bwzero*bw90)
+
+
+    print("Total pattern")
+    print(f"The beamwidth in the phi=90 plane is {bw90} deg")
+    print(f"The beamwidth in the phi=0 plane is {bwzero} deg")
+    print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.log10(D),4)} dB")
+    
+def lab3_ex2d():
+    print(10*"-")
+    print("D")
+
+    # 3D PLOT
+    N,M = 8,8
+    L,W = 5e-3,6.5e-3
+    dx=dy
+
+    phi = np.linspace(0,np.pi,LOW_RES)
+    theta = np.linspace(-np.pi,np.pi,LOW_RES)
+
+    THETA,PHI = np.meshgrid(theta,phi)
+
+
+    # calc pattern of element
+    element_pattern_norm = patch_antenna(L,W,THETA,PHI)
+    # calc array factor of 8x8 array
+    AF_norm = array_factor(dy, dx, PHI, THETA, N, M=M)
+        
+    total_pattern = AF_norm * element_pattern_norm
+    # PLOTTING
+    plot_pattern3D(total_pattern, THETA, PHI)
+
+
+    # CALCULATING DIRECTIVITY
+    # only use two phi's
+    phi = np.array([0,np.pi/2])
+    theta = np.linspace(-np.pi,np.pi,HIGH_RES)
+    THETA,PHI = np.meshgrid(theta,phi)
+    
+    # array factor
+    AF_norm = array_factor(dy, dx, PHI, THETA, N, M=M)
+    # split in zero and 90  
+    AF_zerophi,AF_90phi = AF_norm
+
+    # element pattern
+    element_pattern_norm = patch_antenna(L,W,THETA,PHI)
+    
+    # split in zero and 90
+    pattern_zerophi, pattern_90phi = element_pattern_norm
+    
+    total_zerophi = AF_zerophi * pattern_zerophi
+    total_90phi = AF_90phi * pattern_90phi
+
+    # calc beamwidth
+    beamwidth90 = get_beamwidth(total_90phi, theta)
+    beamwidthzero = get_beamwidth(total_zerophi, theta)
+
+
+    print(10*"-")
+    print("8x8 matrix")
+    print(f"The beamwidth in the phi=90 plane is {beamwidth90} deg")
+    print(f"The beamwidth in the phi=0 plane is {beamwidthzero} deg")
+
+    D = 4*np.pi*(180/np.pi)**2 / (beamwidthzero*beamwidth90)
+
+    print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.log10(D),4)} dB")
+
+
+
+
+if __name__=="__main__":
+    
+    
+    lab3_ex2d()
+    
+    
+
+
 
