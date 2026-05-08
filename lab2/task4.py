@@ -23,7 +23,7 @@ def readout_s2p(your_file):
 
 phi = 0
 
-freq, S11, S21, S12, S22 = readout_s2p("measurements/Practicum2-1.38m/0.s2p")
+freq, S11, S21, S12, S22 = readout_s2p("lab2/measurements/Practicum2-1.38m/0.s2p")
 
 c0 = 3e8
 
