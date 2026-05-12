@@ -58,8 +58,8 @@ taper_coef = chebwin(N, att)
 
 print("Amplitude weights:",taper_coef)
 
-phi = np.linspace(-np.pi,np.pi,1000)
-theta = np.linspace(0,np.pi,1000)
+phi = np.linspace(-np.pi,np.pi,LOW_RES)
+theta = np.linspace(0,np.pi,LOW_RES)
 
 THETA,PHI = np.meshgrid(theta,phi)
 
@@ -76,8 +76,12 @@ plot_pattern3D(AF_norm, THETA, PHI, title="8x1 array")
 # 2D PLOTS
 
 theta = np.linspace(-np.pi/2,np.pi/2,HIGH_RES)
+phi = np.array([0,np.pi/2])
+THETA, PHI = np.meshgrid(theta, phi)
 
-fig,ax,AF_zerophi,AF_90phi = plot_2d_cuts(array_factor_taper, dy,0,taper_coef,N)
+AF_zerophi,AF_90phi = array_factor_taper(dy,0,PHI,THETA,taper_coef,N)
+
+fig,ax = plot_2d_cuts(AF_zerophi,AF_90phi, theta)
 
 
 AF_zerophi_dB = 20*np.log10(AF_zerophi)
@@ -129,8 +133,8 @@ taper_coef = a*b
 
 print("Amplitude weights:",taper_coef)
 
-phi = np.linspace(0,np.pi,1000)
-theta = np.linspace(-np.pi,np.pi,1000)
+phi = np.linspace(0,np.pi,LOW_RES)
+theta = np.linspace(-np.pi,np.pi,LOW_RES)
 
 THETA,PHI = np.meshgrid(theta,phi)
 
@@ -144,8 +148,13 @@ plot_pattern3D(AF_norm, THETA, PHI, title="8x8 array")
 # 2D PLOTS
 
 theta = np.linspace(-np.pi/2,np.pi/2,HIGH_RES)
+phi = np.array([0,np.pi/2])
+THETA, PHI = np.meshgrid(theta, phi)
 
-fig,ax,AF_zerophi,AF_90phi = plot_2d_cuts(array_factor_taper, dy,dx,taper_coef,N,M=M)
+AF_zerophi,AF_90phi = array_factor_taper(dy,dx,PHI,THETA,taper_coef,N, M=M)
+
+fig,ax = plot_2d_cuts(AF_zerophi,AF_90phi, theta)
+
 
 
 AF_zerophi_dB = 20*np.log10(AF_zerophi)
