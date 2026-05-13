@@ -396,6 +396,9 @@ if __name__=="__main__":
     
     
     lab3_ex2a()
+    lab3_ex2b()
+    lab3_ex2c()
+    lab3_ex2d()
     
     
 
