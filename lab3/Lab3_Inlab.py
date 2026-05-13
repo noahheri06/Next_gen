@@ -86,50 +86,50 @@ def patch_gain_from_S21(freq, S21):
     return gain_patch
 
 
-def get_beamwidth(pattern,theta):
-    power = pattern**2
-    ind_above_halfpower = np.where(power>0.5)[0]
-    splits = np.where(np.diff(ind_above_halfpower) !=1)[0] + 1
-    groups = np.split(ind_above_halfpower,splits)
+# def get_beamwidth(pattern,theta):
+#     power = pattern**2
+#     ind_above_halfpower = np.where(power>0.5)[0]
+#     splits = np.where(np.diff(ind_above_halfpower) !=1)[0] + 1
+#     groups = np.split(ind_above_halfpower,splits)
 
-    middlebeam = groups[floor(len(groups)/2)]
+#     middlebeam = groups[floor(len(groups)/2)]
 
-    bw = theta[middlebeam[-1]]-theta[middlebeam[0]]
-    bw = np.rad2deg(bw)
+#     bw = theta[middlebeam[-1]]-theta[middlebeam[0]]
+#     bw = np.rad2deg(bw)
     
-    return(bw)
+#     return(bw)
 
-def patch_antenna(L,W,THETA,PHI):
-    vx = (L/lambd) * np.sin(THETA) * np.cos(PHI)
-    vy = (W/lambd) * np.sin(THETA) * np.sin(PHI)
+# def patch_antenna(L,W,THETA,PHI):
+#     vx = (L/lambd) * np.sin(THETA) * np.cos(PHI)
+#     vy = (W/lambd) * np.sin(THETA) * np.sin(PHI)
 
-    f = np.cos(vx*np.pi) * np.sinc(vy)
+#     f = np.cos(vx*np.pi) * np.sinc(vy)
 
-    pattern = (np.cos(THETA)**2 * np.sin(PHI)**2 + np.cos(PHI)**2) * np.abs(f)**2
+#     pattern = (np.cos(THETA)**2 * np.sin(PHI)**2 + np.cos(PHI)**2) * np.abs(f)**2
 
-    pattern_norm = pattern/np.max(pattern)
+#     pattern_norm = pattern/np.max(pattern)
     
     
-    return(pattern_norm)
+#     return(pattern_norm)
 
-def get_theo_directivity(pattern_norm):
-    total_norm = pattern_norm * AF_norm
+# def get_theo_directivity(pattern_norm):
+#     total_norm = pattern_norm * AF_norm
 
-    theta = np.linspace(0, np.pi, 1000)
-    phi = np.linspace(-np.pi, np.pi, 1000)
+#     theta = np.linspace(0, np.pi, 1000)
+#     phi = np.linspace(-np.pi, np.pi, 1000)
 
-    total_zerophi = AF_zerophi[::10] * pattern_zerophi
-    total_90phi = AF_90phi[::10] * pattern_90phi
+#     total_zerophi = AF_zerophi[::10] * pattern_zerophi
+#     total_90phi = AF_90phi[::10] * pattern_90phi
 
 
 
-    bwzero = get_beamwidth(total_zerophi,theta)
-    bw90 = get_beamwidth(total_90phi,theta)
+#     bwzero = get_beamwidth(total_zerophi,theta)
+#     bw90 = get_beamwidth(total_90phi,theta)
 
-    #calc directivity
-    D = 4*np.pi*(180/np.pi)**2 / (bwzero*bw90)
+#     #calc directivity
+#     D = 4*np.pi*(180/np.pi)**2 / (bwzero*bw90)
 
-    return D ##### moet nog af
+#     return D ##### moet nog af
 
 def compare(gain, D):
    efficiency = gain/D
