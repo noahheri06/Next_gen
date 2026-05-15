@@ -37,7 +37,7 @@ def plot_pattern3D(pattern,THETA,PHI,title=""):
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
 
-    ax.plot_surface(X,Y,Z, facecolors = colors, edgecolor="none", antialiased=True)
+    im = ax.plot_surface(X,Y,Z, facecolors = colors, edgecolor="none", antialiased=True)
 
     ax.set_xlabel("x")
     ax.set_ylabel("y")
@@ -47,6 +47,7 @@ def plot_pattern3D(pattern,THETA,PHI,title=""):
     ax.set_zlim(0,2.02)
     
     ax.set_title(title)
+    
 
     plt.grid()
     plt.show()
@@ -318,6 +319,12 @@ def lab3_ex2c():
     total_zerophi = ef_zerophi * af_zerophi
     total_90phi = ef_90phi * af_90phi
     
+    
+    fig,ax = plot_2d_cuts(total_zerophi, total_90phi,theta)
+    ax.set_ylabel("normalized gain (dB)")
+    ax.set_title("Total radiation pattern (8x1 patch array)")
+    
+    
     # calc beamwidth
     bwzero = get_beamwidth(total_zerophi,theta)
     bw90 = get_beamwidth(total_90phi,theta)
@@ -377,7 +384,9 @@ def lab3_ex2d():
     total_zerophi = AF_zerophi * pattern_zerophi
     total_90phi = AF_90phi * pattern_90phi
     
-    
+    fig,ax = plot_2d_cuts(total_zerophi, total_90phi,theta)
+    ax.set_ylabel("normalized gain (dB)")
+    ax.set_title("Total radiation pattern (8x8 patch array)")
     
     # calc beamwidth
     beamwidth90 = get_beamwidth(total_90phi, theta)
@@ -399,10 +408,10 @@ def lab3_ex2d():
 if __name__=="__main__":
     
     
-    lab3_ex2a()
+    #lab3_ex2a()
     #lab3_ex2b()
     #lab3_ex2c()
-    #lab3_ex2d()
+    lab3_ex2d()
     
     
 
