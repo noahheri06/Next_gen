@@ -375,6 +375,10 @@ def lab3_ex2d():
     AF_zerophi,AF_90phi = AF_norm
 
 
+    fig,ax = plot_2d_cuts(AF_zerophi, AF_90phi,theta)
+    ax.set_ylabel("normalized array factor (dB)")
+    ax.set_title("Array factor (8x8 patch array)")
+
     # element pattern
     element_pattern_norm = patch_antenna(L,W,THETA,PHI)
     
