@@ -12,7 +12,7 @@ k0 = 2*np.pi/lambd
 dy = lambd/2
 
 
-LOW_RES = 2000
+LOW_RES = 500
 HIGH_RES = 10000
 
 
@@ -163,6 +163,7 @@ def plot_2d_cuts(pat_zerophi,pat_90phi,theta):
 
 
 
+
 def lab3_ex2a():
     print("A")
     
@@ -176,6 +177,9 @@ def lab3_ex2a():
     #AF_norm = AF_norm # 20*np.log10(np.where(AF_norm>1e-6,AF_norm,1e-6))+121
     
     plot_pattern3D(AF_norm, THETA, PHI,title="Array factor") 
+    
+    
+
     
      
     # 2D cuts
@@ -396,9 +400,9 @@ if __name__=="__main__":
     
     
     lab3_ex2a()
-    lab3_ex2b()
-    lab3_ex2c()
-    lab3_ex2d()
+    #lab3_ex2b()
+    #lab3_ex2c()
+    #lab3_ex2d()
     
     
 
