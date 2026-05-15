@@ -392,7 +392,33 @@ def lab3_ex2d():
     ax.set_ylabel("normalized gain (dB)")
     ax.set_title("Total radiation pattern (8x8 patch array)")
     
+    
+    
+    # purely array factor 
+    print("Purely array factor----------")
+    beamwidth90 = get_beamwidth(AF_90phi, theta)
+    beamwidthzero = get_beamwidth(AF_zerophi, theta)
+
+
+    print(10*"-")
+    print("8x8 matrix")
+    print(f"The beamwidth in the phi=90 plane is {beamwidth90} deg")
+    print(f"The beamwidth in the phi=0 plane is {beamwidthzero} deg")
+
+    D = 4*np.pi*(180/np.pi)**2 / (beamwidthzero*beamwidth90)
+
+    print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.log10(D),4)} dB")
+    
+    
+    
+    
+    
+    
+    
+    
+    
     # calc beamwidth
+    print("Total pattern---------------")
     beamwidth90 = get_beamwidth(total_90phi, theta)
     beamwidthzero = get_beamwidth(total_zerophi, theta)
 
