@@ -402,6 +402,11 @@ def lab3_ex2d():
 
     print(10*"-")
     print("8x8 matrix")
+    AF_90phi_dB = 20*np.log10(AF_90phi)
+    max_sidelobe = calc_sidelobelevel(AF_90phi_dB)
+    print(f"The maximum sidelobe level is {round(max_sidelobe,4)} dB")
+    
+    
     print(f"The beamwidth in the phi=90 plane is {beamwidth90} deg")
     print(f"The beamwidth in the phi=0 plane is {beamwidthzero} deg")
 
