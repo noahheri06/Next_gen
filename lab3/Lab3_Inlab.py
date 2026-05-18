@@ -7,6 +7,8 @@
 import numpy as np
 import skrf as rf
 import matplotlib.pyplot as plt
+
+
 Z0 = 50
 C = 3e8
 R = 1,43
@@ -72,10 +74,9 @@ def calc_bandwith(Z_ant, freq):
   return bandwith
 
 def get_horn_gain():
-    freq, S11, S21, S12, S22 = readout_s2p("measurements/Practicum2-1.38m/0.s2p")
+    freq, S11, S21, S12, S22 = readout_s2p("Practicum2-1.38m/0")
 
     c0 = 3e8
-
 
     r = 1.38 # 1, 0.5
     lambd = c0/freq
@@ -205,6 +206,8 @@ def array_plotter(op_frequencie, symtrec = True):
 
 
 
+
+
 # =============================================================================
 # TASK 1,2,3
 # =============================================================================
@@ -237,8 +240,8 @@ for i, antenna in zip(list(range(len(antarrays))),antarrays):
     ax2.plot(freq/1e9,imp,label="Impedance",color="blue")
     
     ax.set_xlabel("Frequency (GHz)")
-    ax.set_ylabel("gain (dB)")
-    ax2.set_ylabel("Impedanec ($\Omega$)")
+    ax.set_ylabel("Gain (dB)")
+    ax2.set_ylabel("Impedance ($\Omega$)")
     ax.grid()
     ax.legend(loc=2, prop={'size': 15})
     ax2.legend(loc=1, prop={'size': 15})
@@ -249,7 +252,7 @@ for i, antenna in zip(list(range(len(antarrays))),antarrays):
     
     
     
-    
+    #%%
 # =============================================================================
 # TASK 4,5,6
 # =============================================================================
@@ -257,6 +260,9 @@ for i, antenna in zip(list(range(len(antarrays))),antarrays):
 # again only one direction is needed
 
 antarrays = ["1x1patch","1x2patch","1x4patch","1x8patcha"]
+
+
+# plot received power (based on S21)
 
 fig, axs = plt.subplots(2, 2)
 #fig.tight_layout()
@@ -270,22 +276,60 @@ for i, antenna in zip(list(range(len(antarrays))),antarrays):
     
     S21 = np.abs(S21)
     
+    power = S21**2
 
     
-    S21_dB = 10*np.log10(S21)
+    power_dB = 10*np.log10(power)
     
-
-    ax.set_title(f"{antenna[:3]} array reflection and impedance")
-    ax.plot(freq/1e9,S21_dB,label="S21 parameter",color="orange")
-
+    
+    ax.set_title(f"{antenna[:3]} array received power")
+    ax.plot(freq/1e9,power_dB,label="Received power")
+    
+    
     
     ax.set_xlabel("Frequency (GHz)")
-    ax.set_ylabel("gain (dB)")
+    ax.set_ylabel("Gain (dB)")
+    ax.grid()
+    #ax.legend(loc=2, prop={'size': 15})
+    plt.show()
+
+
+
+fig, axs = plt.subplots(2, 2)
+#fig.tight_layout()
+plt.subplots_adjust(top=0.95,bottom=0.1,wspace=0.4,hspace=0.4)
+for i, antenna in zip(list(range(len(antarrays))),antarrays):
+    x = i//2
+    y= i % 2
+    ax = axs[x,y]
+    
+    freq, S11, S21, S12, S22 = readout_s2p(antenna)
+    
+   
+    
+    c0 = 3e8
+
+    r = 1.38 # 1, 0.5
+    lambd = c0/freq
+    
+    total_gain = np.abs(S21)**2 * (4*np.pi*r/lambd)**2
+    _, horn_gain = get_horn_gain()
+    array_gain = total_gain/horn_gain
+    
+    array_gain_dB = 10*np.log10(array_gain)
+    
+    #ax2 = ax.twinx()
+
+    ax.set_title(f"{antenna[:3]} array and horn antenna")
+    #ax.plot(freq/1e9,array_gain_dB,label="Array gain")
+    ax.plot(freq/1e9,10*np.log10(horn_gain),label="Horn",color="orange")
+    ax.plot(freq/1e9,10*np.log10(total_gain),label="Total", color="red")
+    
+    ax.set_xlabel("Frequency (GHz)")
+    ax.set_ylabel("Gain (dB)")
     ax.grid()
     ax.legend(loc=2, prop={'size': 15})
     plt.show()
-
-    
 
 
 
