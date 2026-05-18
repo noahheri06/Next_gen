@@ -232,7 +232,7 @@ print(f"The beamwidth in the phi=0 plane is {beamwidthzero} deg")
 
 D = 4*np.pi*(180/np.pi)**2 / (beamwidthzero*beamwidth90)
 
-print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.log10(D),4)} dB")
+print(f"The directivity of the antenna is {round(D,3)}, which is {round(10*np.log10(D),4)} dB")
 
 
 

@@ -321,17 +321,40 @@ for i, antenna in zip(list(range(len(antarrays))),antarrays):
     #ax2 = ax.twinx()
 
     ax.set_title(f"{antenna[:3]} array and horn antenna")
-    #ax.plot(freq/1e9,array_gain_dB,label="Array gain")
-    ax.plot(freq/1e9,10*np.log10(horn_gain),label="Horn",color="orange")
-    ax.plot(freq/1e9,10*np.log10(total_gain),label="Total", color="red")
+    ax.plot(freq/1e9,array_gain_dB,label="Array gain")
+    # ax.plot(freq/1e9,10*np.log10(horn_gain),label="Horn",color="orange")
+    # ax.plot(freq/1e9,10*np.log10(total_gain),label="Total", color="red")
     
     ax.set_xlabel("Frequency (GHz)")
     ax.set_ylabel("Gain (dB)")
     ax.grid()
     ax.legend(loc=2, prop={'size': 15})
     plt.show()
+    
+    
+    
+    # efficiency calc at 15 GHz
+
+    ind_15GHz = np.where(freq==15e9)[0][0]
+    
+    array_gain_15GHz = array_gain[ind_15GHz]
+    
+    print(f"Gain at 15 GHz: {10*np.log10(array_gain_15GHz)} dB")
+    
+    
+
+    
 
 
+
+
+
+
+
+
+# =============================================================================
+# 
+# =============================================================================
 
 
 

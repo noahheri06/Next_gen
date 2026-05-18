@@ -210,7 +210,7 @@ def lab3_ex2a():
 
     D = 4*np.pi*(180/np.pi)**2 / (beamwidthzero*beamwidth90)
 
-    print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.log10(D),4)} dB")
+    print(f"The directivity of the antenna is {round(D,3)}, which is {round(10*np.log10(D),4)} dB")
 
     # actual plotting
     fig,ax = plot_2d_cuts(AF_zerophi, AF_90phi, theta)
@@ -272,7 +272,7 @@ def lab3_ex2b():
     print("Patch antenna")
     print(f"The beamwidth in the phi=90 plane is {bw90} deg")
     print(f"The beamwidth in the phi=0 plane is {bwzero} deg")
-    print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.log10(D),4)} dB")
+    print(f"The directivity of the antenna is {round(D,3)}, which is {round(10*np.log10(D),4)} dB")
     
     
 def lab3_ex2c():
@@ -336,7 +336,7 @@ def lab3_ex2c():
     print("Total pattern")
     print(f"The beamwidth in the phi=90 plane is {bw90} deg")
     print(f"The beamwidth in the phi=0 plane is {bwzero} deg")
-    print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.log10(D),4)} dB")
+    print(f"The directivity of the antenna is {round(D,3)}, which is {round(10*np.log10(D),4)} dB")
     
 def lab3_ex2d():
     print(10*"-")
@@ -412,7 +412,7 @@ def lab3_ex2d():
 
     D = 4*np.pi*(180/np.pi)**2 / (beamwidthzero*beamwidth90)
 
-    print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.log10(D),4)} dB")
+    print(f"The directivity of the antenna is {round(D,3)}, which is {round(10*np.log10(D),4)} dB")
     
     
     
@@ -435,7 +435,7 @@ def lab3_ex2d():
 
     D = 4*np.pi*(180/np.pi)**2 / (beamwidthzero*beamwidth90)
 
-    print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.log10(D),4)} dB")
+    print(f"The directivity of the antenna is {round(D,3)}, which is {round(10*np.log10(D),4)} dB")
 
 
 
