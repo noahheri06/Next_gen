@@ -155,14 +155,14 @@ def compare(gain, D):
    print(f"The efficiency is equal to {efficiency}")
    return efficiency
 
-def array_plotter(op_frequencie, symtrec = True):
-
+def array_plotter(op_frequencie, array_name, symtrec = True):
+    fig, ax = plt.subplots(1, 1)
     p =[]
 
     if(symtrec):
-        for i in range(46):
+        for i in range(36):
             # print(i)
-            freq, S11, S21, S12, S22 = readout_s2p(f'{i*2}') #get correct name
+            freq, S11, S21, S12, S22 = readout_s2p(f'{array_name}{i*2}') #get correct name
             index = np.where(freq == op_frequencie) ##operating frequency
             #find correct indexis
 
@@ -186,16 +186,16 @@ def array_plotter(op_frequencie, symtrec = True):
             p.append(db[index])
     
     angles = np.linspace(-70, 70, 71)
-    plt.plot(angles, p, label='15 GHz')
-    plt.title("S21 parameter vs angle")
-    plt.grid()
-    plt.xlabel("angle (degrees)")
-    plt.ylabel("Magnitude (dB)")
+    ax.plot(angles, p, label='15 GHz')
+    ax.set_title(f"{array_name} radiation pattern")
+    ax.grid()
+    ax.set_xlabel("angle (degrees)")
+    ax.set_ylabel("Magnitude (dB)")
     plt.legend()
     #plt.savefig("lab3/plots/powerplot.png")
     plt.show()
 
-    indexmax = np.where(p == np.max(p))
+    indexmax = np.where(p == np.max(p))[0]
     anglemax = angles[indexmax]
     print(f"the max angle is {anglemax}")
 
@@ -350,12 +350,31 @@ for i, antenna in zip(list(range(len(antarrays))),antarrays):
 
 
 
-
+#%%
 
 # =============================================================================
-# 
+# task 7
 # =============================================================================
 
+
+
+
+
+
+
+
+
+
+antennas = ["1x8a","1x8ap","1x8b","1x8c","1x8d"]
+
+
+for antenna in antennas:
+    
+    if antenna=="1x8ap":
+        array_plotter(15e9,antenna,symtrec=False)
+    else:
+        array_plotter(15e9,antenna,symtrec=True)
+    
 
 
 
