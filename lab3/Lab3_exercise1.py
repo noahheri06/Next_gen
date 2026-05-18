@@ -10,6 +10,7 @@ def find_L_W(fr, er, h):
     w = C/(2*fr*np.sqrt((er+1)/2))
     epsilon_eff = (er+1)/2 + (er-1)/(2*np.sqrt(1+12*h/w))
     L_eff = C/(2*fr*np.sqrt(epsilon_eff))
+    print(epsilon_eff, L_eff)
     delta_L = (0.412*h*(epsilon_eff+0.3)*(w/h+0.264))/((epsilon_eff-0.258)*(w/h+0.8))
     l = L_eff - 2*delta_L
     print(f"Found W and L are: W = {w*1000} mm, L = {l*1000} mm")
