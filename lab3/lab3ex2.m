@@ -45,9 +45,8 @@ function plot_pattern3D(pattern, THETA, PHI, titleStr)
     ylabel('y');
     zlabel('z');
 
-    xlim([-1.01 1.01]);
-    ylim([-1.01 1.01]);
-    zlim([0 2.02]);
+    a=colorbar;
+    a.Label.String = 'Array Factor (dB)';
 
     title(titleStr);
     grid on;
