@@ -16,7 +16,7 @@ R = 1,43
 
 def readout_s2p(your_file):
 
-  ntwk = rf.Network(f'lab3/measurements/{your_file}.s2p')
+  ntwk = rf.Network(f'measurements/{your_file}.s2p')
 
   # Frequency (Hz)
   freq = ntwk.f
@@ -46,6 +46,24 @@ def calculate_minusdB_bandwidth(freq, s11_db, threshold=-10):
     max_freq = freq[valid_indices[-1]]
 
     return max_freq - min_freq
+
+
+def calc_op_bandwidth(freq,s11_db,threshold=-10):
+    ind_above_10 = np.where(s11_db >= threshold)[0]
+
+    lower_max = len(freq)/4
+    upper_min = len(freq)/2
+    # lower bound
+    lower_ind = np.max(ind_above_10[np.where(ind_above_10 < lower_max)[0]])
+    upper_ind = np.min(ind_above_10[np.where(ind_above_10 > upper_min)[0]])
+    
+    
+    min_freq = freq[lower_ind]
+    max_freq = freq[upper_ind]
+    
+    
+    return(max_freq - min_freq)
+
 
 def calc_bandwith(Z_ant, freq):
   gamma_ant = (Z_ant - Z0) / (Z_ant + Z0)
@@ -173,7 +191,7 @@ def array_plotter(op_frequencie, symtrec = True):
     plt.xlabel("angle (degrees)")
     plt.ylabel("Magnitude (dB)")
     plt.legend()
-    plt.savefig("lab3/plots/powerplot.png")
+    #plt.savefig("lab3/plots/powerplot.png")
     plt.show()
 
     indexmax = np.where(p == np.max(p))
@@ -181,6 +199,108 @@ def array_plotter(op_frequencie, symtrec = True):
     print(f"the max angle is {anglemax}")
 
 
-array_plotter(15e9, False)
+#array_plotter(15e9, False)
 
 #S11**2 = p_ref/p_in
+
+
+
+# =============================================================================
+# TASK 1,2,3
+# =============================================================================
+
+# only antenna facing directly to horn antenna
+
+antarrays = ["1x1patch","1x2patch","1x4patch","1x8patcha"]
+
+fig, axs = plt.subplots(2, 2)
+#fig.tight_layout()
+plt.subplots_adjust(top=0.95,bottom=0.1,wspace=0.4,hspace=0.4)
+for i, antenna in zip(list(range(len(antarrays))),antarrays):
+    x = i//2
+    y= i % 2
+    ax = axs[x,y]
+    
+    freq, S11, S21, S12, S22 = readout_s2p(antenna)
+    
+    S11 = np.abs(S11)
+    
+    imp = calc_impedance(S11)
+    
+    
+    S11_dB = 10*np.log10(S11)
+    
+
+    ax2 = ax.twinx()
+    ax.set_title(f"{antenna[:3]} array reflection and impedance")
+    ax.plot(freq/1e9,S11_dB,label="Reflection coefficient",color="orange")
+    ax2.plot(freq/1e9,imp,label="Impedance",color="blue")
+    
+    ax.set_xlabel("Frequency (GHz)")
+    ax.set_ylabel("gain (dB)")
+    ax2.set_ylabel("Impedanec ($\Omega$)")
+    ax.grid()
+    ax.legend(loc=2, prop={'size': 15})
+    ax2.legend(loc=1, prop={'size': 15})
+    plt.show()
+    
+    op_bandwidth = calc_op_bandwidth(freq,S11_dB)/1e9
+    print(f"The operational bandwidth of the {antenna} array is {op_bandwidth} GHz")
+    
+    
+    
+    
+# =============================================================================
+# TASK 4,5,6
+# =============================================================================
+
+# again only one direction is needed
+
+antarrays = ["1x1patch","1x2patch","1x4patch","1x8patcha"]
+
+fig, axs = plt.subplots(2, 2)
+#fig.tight_layout()
+plt.subplots_adjust(top=0.95,bottom=0.1,wspace=0.4,hspace=0.4)
+for i, antenna in zip(list(range(len(antarrays))),antarrays):
+    x = i//2
+    y= i % 2
+    ax = axs[x,y]
+    
+    freq, S11, S21, S12, S22 = readout_s2p(antenna)
+    
+    S21 = np.abs(S21)
+    
+
+    
+    S21_dB = 10*np.log10(S21)
+    
+
+    ax.set_title(f"{antenna[:3]} array reflection and impedance")
+    ax.plot(freq/1e9,S21_dB,label="S21 parameter",color="orange")
+
+    
+    ax.set_xlabel("Frequency (GHz)")
+    ax.set_ylabel("gain (dB)")
+    ax.grid()
+    ax.legend(loc=2, prop={'size': 15})
+    plt.show()
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

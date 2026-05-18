@@ -12,7 +12,7 @@ k0 = 2*np.pi/lambd
 dy = lambd/2
 
 
-LOW_RES = 2000
+LOW_RES = 500
 HIGH_RES = 10000
 
 
@@ -37,7 +37,7 @@ def plot_pattern3D(pattern,THETA,PHI,title=""):
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
 
-    ax.plot_surface(X,Y,Z, facecolors = colors, edgecolor="none", antialiased=True)
+    im = ax.plot_surface(X,Y,Z, facecolors = colors, edgecolor="none", antialiased=True)
 
     ax.set_xlabel("x")
     ax.set_ylabel("y")
@@ -47,6 +47,7 @@ def plot_pattern3D(pattern,THETA,PHI,title=""):
     ax.set_zlim(0,2.02)
     
     ax.set_title(title)
+    
 
     plt.grid()
     plt.show()
@@ -163,6 +164,7 @@ def plot_2d_cuts(pat_zerophi,pat_90phi,theta):
 
 
 
+
 def lab3_ex2a():
     print("A")
     
@@ -176,6 +178,9 @@ def lab3_ex2a():
     #AF_norm = AF_norm # 20*np.log10(np.where(AF_norm>1e-6,AF_norm,1e-6))+121
     
     plot_pattern3D(AF_norm, THETA, PHI,title="Array factor") 
+    
+    
+
     
      
     # 2D cuts
@@ -314,6 +319,12 @@ def lab3_ex2c():
     total_zerophi = ef_zerophi * af_zerophi
     total_90phi = ef_90phi * af_90phi
     
+    
+    fig,ax = plot_2d_cuts(total_zerophi, total_90phi,theta)
+    ax.set_ylabel("normalized gain (dB)")
+    ax.set_title("Total radiation pattern (8x1 patch array)")
+    
+    
     # calc beamwidth
     bwzero = get_beamwidth(total_zerophi,theta)
     bw90 = get_beamwidth(total_90phi,theta)
@@ -364,6 +375,10 @@ def lab3_ex2d():
     AF_zerophi,AF_90phi = AF_norm
 
 
+    fig,ax = plot_2d_cuts(AF_zerophi, AF_90phi,theta)
+    ax.set_ylabel("normalized array factor (dB)")
+    ax.set_title("Array factor (8x8 patch array)")
+
     # element pattern
     element_pattern_norm = patch_antenna(L,W,THETA,PHI)
     
@@ -373,9 +388,42 @@ def lab3_ex2d():
     total_zerophi = AF_zerophi * pattern_zerophi
     total_90phi = AF_90phi * pattern_90phi
     
+    fig,ax = plot_2d_cuts(total_zerophi, total_90phi,theta)
+    ax.set_ylabel("normalized gain (dB)")
+    ax.set_title("Total radiation pattern (8x8 patch array)")
+    
+    
+    
+    # purely array factor 
+    print("Purely array factor----------")
+    beamwidth90 = get_beamwidth(AF_90phi, theta)
+    beamwidthzero = get_beamwidth(AF_zerophi, theta)
+
+
+    print(10*"-")
+    print("8x8 matrix")
+    AF_90phi_dB = 20*np.log10(AF_90phi)
+    max_sidelobe = calc_sidelobelevel(AF_90phi_dB)
+    print(f"The maximum sidelobe level is {round(max_sidelobe,4)} dB")
+    
+    
+    print(f"The beamwidth in the phi=90 plane is {beamwidth90} deg")
+    print(f"The beamwidth in the phi=0 plane is {beamwidthzero} deg")
+
+    D = 4*np.pi*(180/np.pi)**2 / (beamwidthzero*beamwidth90)
+
+    print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.log10(D),4)} dB")
+    
+    
+    
+    
+    
+    
+    
     
     
     # calc beamwidth
+    print("Total pattern---------------")
     beamwidth90 = get_beamwidth(total_90phi, theta)
     beamwidthzero = get_beamwidth(total_zerophi, theta)
 
@@ -395,9 +443,9 @@ def lab3_ex2d():
 if __name__=="__main__":
     
     
-    lab3_ex2a()
-    lab3_ex2b()
-    lab3_ex2c()
+    #lab3_ex2a()
+    #lab3_ex2b()
+    #lab3_ex2c()
     lab3_ex2d()
     
     

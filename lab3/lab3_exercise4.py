@@ -45,6 +45,56 @@ def array_factor_taper(dy,dx,PHI,THETA,taper,N,M=1,resolution=LOW_RES):
 
 
 
+def plot_weights(weights,dy,dx):
+    
+    if dx==0:
+        ys = np.arange(len(weights)) * dy
+        fig = plt.figure()
+        ax = fig.add_subplot(projection='3d')
+        # coefficients
+        ax.scatter(len(weights)*[0],ys,weights)
+        # elements
+        ax.scatter(len(weights)*[0],ys,len(weights)*[0],color = "red")
+        # lines
+        for i in range(len(weights)):
+            ax.plot([0, 0], [ys[i], ys[i]], [0, weights[i]], color="black", linewidth = 0.3)
+            
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
+        ax.set_zlabel("z")
+        ax.set_title("Array amplitude weights")
+        return(fig,ax)
+    
+
+    M,N = np.shape(weights)
+    ys = np.transpose(np.tile(np.arange(M),(N,1))) * dy
+    xs = np.tile(np.arange(N),(M,1)) * dx
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    
+    #coefficients
+    ax.scatter(xs,ys,weights)
+    
+    # elements
+    ax.scatter(xs,ys,np.zeros(np.shape(weights)), color = "red")
+    
+    # lines 
+    for i in range(M):
+        for j in range(N):
+            ax.plot([xs[i, j], xs[i, j]], [ys[i, j], ys[i, j]], [0, weights[i, j]],color="black", linewidth=0.3)
+    
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_zlabel("z")
+    ax.set_title("Array amplitude weights")
+    
+    plt.grid()
+    plt.show()
+    return(fig,ax)
+    
+
+
 # =============================================================================
 # A
 # =============================================================================
@@ -55,6 +105,8 @@ att = 45
 # taper coefficients
 taper_coef = chebwin(N, att)
 #taper_coef = 8*[1]
+
+fig,ax = plot_weights(taper_coef,0.01,0)
 
 print("Amplitude weights:",taper_coef)
 
@@ -127,7 +179,7 @@ taper_coef_M = chebwin(M, att)
 a,b = np.meshgrid(taper_coef_N,taper_coef_M)
 
 taper_coef = a*b
-
+fig,ax = plot_weights(taper_coef,0.01,0.01)
 # uncomment to the see case with constant coefficients
 #taper_coef = 8*[8*[1]]
 
