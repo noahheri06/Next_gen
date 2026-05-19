@@ -109,6 +109,7 @@ def directivity_plot(phi, theta, gain):
 
     D = 4*np.pi * gain / total_power
     plot_gain(phi, theta, D)
+    return(D)
 
 
 def plot_2d_cuts(pat_zerophi,pat_90phi,theta):

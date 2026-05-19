@@ -179,7 +179,10 @@ def lab3_ex2a():
     
     plot_pattern3D(AF_norm, THETA, PHI,title="Array factor") 
     
+    # calc directivity
+    p_rad = np.trapezoid(np.trapezoid(AF_norm**2 * np.abs(np.sin(theta)),theta),phi)
     
+    D = 4*np.pi*np.max(AF_norm**2)/p_rad
 
     
      
@@ -194,7 +197,7 @@ def lab3_ex2a():
 
 
     #AF_zerophi_dB = 10*np.log10(AF_zerophi)
-    AF_90phi_dB = 10*np.log10(AF_90phi)
+    AF_90phi_dB = 20*np.log10(AF_90phi)
 
     # calc parameters
     max_sidelobe = calc_sidelobelevel(AF_90phi_dB)
@@ -208,7 +211,9 @@ def lab3_ex2a():
     print(f"The beamwidth in the phi=90 plane is {beamwidth90} deg")
     print(f"The beamwidth in the phi=0 plane is {beamwidthzero} deg")
 
-    D = 4*np.pi*(180/np.pi)**2 / (beamwidthzero*beamwidth90)
+    #D = 4*np.pi*(180/np.pi)**2 / (beamwidthzero*beamwidth90)
+
+    
 
     print(f"The directivity of the antenna is {round(D,3)}, which is {round(10*np.log10(D),4)} dB")
 
@@ -269,6 +274,13 @@ def lab3_ex2b():
     D = 4*np.pi*(180/np.pi)**2 / (bwzero*bw90)
     
     
+    theta = np.linspace(0, np.pi/2, LOW_RES)
+    phi = np.linspace(-np.pi, np.pi, LOW_RES)
+    
+    p_rad = np.trapezoid(np.trapezoid(pattern_norm * np.abs(np.sin(theta)),theta),phi)
+    
+    D = 4*np.pi*np.max(pattern_norm)/p_rad
+    
     print("Patch antenna")
     print(f"The beamwidth in the phi=90 plane is {bw90} deg")
     print(f"The beamwidth in the phi=0 plane is {bwzero} deg")
@@ -281,7 +293,7 @@ def lab3_ex2c():
     L,W = 5e-3,6.5e-3
     N = 8
     
-    theta = np.linspace(-np.pi/2, np.pi/2, LOW_RES)
+    theta = np.linspace(0, np.pi/2, LOW_RES)
     phi = np.linspace(-np.pi, np.pi, LOW_RES)
     THETA, PHI = np.meshgrid(theta, phi)
     
@@ -295,7 +307,11 @@ def lab3_ex2c():
 
     # plot 3D
     plot_pattern3D(total_norm, THETA, PHI)
-
+    
+    # calc directivity
+    p_rad = np.trapezoid(np.trapezoid(total_norm * np.abs(np.sin(theta)),theta),phi)
+    
+    D = 4*np.pi*np.max(total_norm)/p_rad
 
     # 2D cuts
     theta = np.linspace(-np.pi/2, np.pi/2, HIGH_RES)
@@ -330,7 +346,7 @@ def lab3_ex2c():
     bw90 = get_beamwidth(total_90phi,theta)
 
     #calc directivity
-    D = 4*np.pi*(180/np.pi)**2 / (bwzero*bw90)
+    #D = 4*np.pi*(180/np.pi)**2 / (bwzero*bw90)
 
 
     print("Total pattern")
@@ -396,13 +412,14 @@ def lab3_ex2d():
     
     # purely array factor 
     print("Purely array factor----------")
+    theta = np.linspace(-np.pi/2,np.pi/2,HIGH_RES)
     beamwidth90 = get_beamwidth(AF_90phi, theta)
     beamwidthzero = get_beamwidth(AF_zerophi, theta)
 
 
     print(10*"-")
     print("8x8 matrix")
-    AF_90phi_dB = 10*np.log10(AF_90phi)
+    AF_90phi_dB = 20*np.log10(AF_90phi)
     max_sidelobe = calc_sidelobelevel(AF_90phi_dB)
     print(f"The maximum sidelobe level is {round(max_sidelobe,4)} dB")
     
@@ -410,20 +427,24 @@ def lab3_ex2d():
     print(f"The beamwidth in the phi=90 plane is {beamwidth90} deg")
     print(f"The beamwidth in the phi=0 plane is {beamwidthzero} deg")
 
-    D = 4*np.pi*(180/np.pi)**2 / (beamwidthzero*beamwidth90)
+    #D = 4*np.pi*(180/np.pi)**2 / (beamwidthzero*beamwidth90)
+    # calc directivity
+    phi = np.linspace(-np.pi,np.pi,LOW_RES)
+    theta = np.linspace(-np.pi/2,np.pi/2,LOW_RES)
+    THETA,PHI = np.meshgrid(theta,phi)
+    AF_norm = array_factor(dy, dx, PHI, THETA, N, M=M)
+    p_rad = np.trapezoid(np.trapezoid(AF_norm**2 * np.abs(np.sin(theta)),theta),phi)
+    
+    D = 4*np.pi*np.max(AF_norm**2)/p_rad
 
     print(f"The directivity of the antenna is {round(D,3)}, which is {round(10*np.log10(D),4)} dB")
     
     
     
     
-    
-    
-    
-    
-    
-    # calc beamwidth
+    # total pattern
     print("Total pattern---------------")
+    theta = np.linspace(-np.pi/2,np.pi/2,HIGH_RES)
     beamwidth90 = get_beamwidth(total_90phi, theta)
     beamwidthzero = get_beamwidth(total_zerophi, theta)
 
@@ -433,8 +454,17 @@ def lab3_ex2d():
     print(f"The beamwidth in the phi=90 plane is {beamwidth90} deg")
     print(f"The beamwidth in the phi=0 plane is {beamwidthzero} deg")
 
-    D = 4*np.pi*(180/np.pi)**2 / (beamwidthzero*beamwidth90)
+    #D = 4*np.pi*(180/np.pi)**2 / (beamwidthzero*beamwidth90)
+    
+    # calc directivity
+    phi = np.linspace(-np.pi,np.pi,LOW_RES)
+    theta = np.linspace(-np.pi/4,np.pi/4,LOW_RES)
+    
+    p_rad = np.trapezoid(np.trapezoid(total_pattern * np.abs(np.sin(theta)),theta),phi)
+    
+    D = 4*np.pi*np.max(total_pattern)/p_rad
 
+    
     print(f"The directivity of the antenna is {round(D,3)}, which is {round(10*np.log10(D),4)} dB")
 
 

@@ -158,7 +158,14 @@ print(f"The beamwidth in the phi=0 plane is {beamwidthzero} deg")
 
 D = 4*np.pi*(180/np.pi)**2 / (beamwidthzero*beamwidth90)
 
-print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.log10(D),4)} dB")
+phi = np.linspace(-np.pi,np.pi,LOW_RES)
+theta = np.linspace(0,np.pi,LOW_RES)
+
+p_rad = np.trapezoid(np.trapezoid(AF_norm**2 * np.abs(np.sin(theta)),theta),phi)
+
+D = 4*np.pi*np.max(AF_norm**2)/p_rad
+
+print(f"The directivity of the antenna is {round(D,3)}, which is {round(10*np.log10(D),4)} dB")
 
 
 #%%
@@ -231,6 +238,13 @@ print(f"The beamwidth in the phi=90 plane is {beamwidth90} deg")
 print(f"The beamwidth in the phi=0 plane is {beamwidthzero} deg")
 
 D = 4*np.pi*(180/np.pi)**2 / (beamwidthzero*beamwidth90)
+
+phi = np.linspace(-np.pi,np.pi,LOW_RES)
+theta = np.linspace(0,np.pi,LOW_RES)
+
+p_rad = np.trapezoid(np.trapezoid(AF_norm**2 * np.abs(np.sin(theta)),theta),phi)
+
+D = 4*np.pi*np.max(AF_norm**2)/p_rad
 
 print(f"The directivity of the antenna is {round(D,3)}, which is {round(10*np.log10(D),4)} dB")
 
