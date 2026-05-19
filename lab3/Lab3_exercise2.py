@@ -142,8 +142,8 @@ def calc_sidelobelevel(pattern):
 
 def plot_2d_cuts(pat_zerophi,pat_90phi,theta):
   
-    pat_zerophi_dB = 20*np.log10(pat_zerophi)
-    pat_90phi_dB = 20*np.log10(pat_90phi)
+    pat_zerophi_dB = 10*np.log10(pat_zerophi)
+    pat_90phi_dB = 10*np.log10(pat_90phi)
 
     fig = plt.figure()
     ax = fig.add_subplot()
@@ -193,8 +193,8 @@ def lab3_ex2a():
     
 
 
-    #AF_zerophi_dB = 20*np.log10(AF_zerophi)
-    AF_90phi_dB = 20*np.log10(AF_90phi)
+    #AF_zerophi_dB = 10*np.log10(AF_zerophi)
+    AF_90phi_dB = 10*np.log10(AF_90phi)
 
     # calc parameters
     max_sidelobe = calc_sidelobelevel(AF_90phi_dB)
@@ -402,7 +402,7 @@ def lab3_ex2d():
 
     print(10*"-")
     print("8x8 matrix")
-    AF_90phi_dB = 20*np.log10(AF_90phi)
+    AF_90phi_dB = 10*np.log10(AF_90phi)
     max_sidelobe = calc_sidelobelevel(AF_90phi_dB)
     print(f"The maximum sidelobe level is {round(max_sidelobe,4)} dB")
     
