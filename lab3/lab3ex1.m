@@ -29,6 +29,10 @@ for k = 1:length(test_frequencies)
 
 end
 
+% Directivity plot at 15 GHz
+g_15GHz = gain_func(l, w, 15e9, phi, theta);
+plot_directivity_15GHz(phi, theta, g_15GHz);
+
 
 function [l, w] = find_L_W(fr, er, h)
 
@@ -40,9 +44,6 @@ function [l, w] = find_L_W(fr, er, h)
         (er - 1) / (2 * sqrt(1 + 12 * h / w));
 
     L_eff = C / (2 * fr * sqrt(epsilon_eff));
-
-    disp(epsilon_eff);
-    disp(L_eff);
 
     delta_L = (0.412 * h * (epsilon_eff + 0.3) * (w/h + 0.264)) / ...
               ((epsilon_eff - 0.258) * (w/h + 0.8));
@@ -105,6 +106,8 @@ function plot_gain_subplot(phi, theta, gain_values)
         end
     end
 
+    gain_values = gain_values / max(gain_values(:));
+
     gain_dB = 10 * log10(gain_values);
     gain_dB = max(min(gain_dB, 0), -c_sens);
 
@@ -112,7 +115,7 @@ function plot_gain_subplot(phi, theta, gain_values)
 
     colormap jet;
     a = colorbar;
-    a.Label.String='Normalized gain (dB)';
+    a.Label.String='Directivity (dBi)';
     caxis([-c_sens 0]);
 
     xlabel('X');
@@ -122,5 +125,40 @@ function plot_gain_subplot(phi, theta, gain_values)
     axis equal;
     grid on;
     view(3);
+
+end
+
+
+function plot_directivity_15GHz(phi, theta, gain_values)
+
+    dtheta = theta(2) - theta(1);
+    dphi = phi(2) - phi(1);
+
+    total_power = 0;
+
+    for i = 1:length(theta)
+        for j = 1:length(phi)
+            total_power = total_power + ...
+                gain_values(i,j) * sin(theta(i)) * dtheta * dphi;
+        end
+    end
+
+    D = 4*pi*gain_values / total_power;
+
+    [Dmax, index] = max(D(:));
+    [i_max, j_max] = ind2sub(size(D), index);
+
+    theta_max = theta(i_max);
+    phi_max = phi(j_max);
+
+    fprintf('\nMaximum directivity at 15 GHz:\n');
+    fprintf('Dmax = %.4f\n', Dmax);
+    fprintf('Dmax = %.4f dBi\n', 10*log10(Dmax));
+    fprintf('Theta = %.2f degrees\n', rad2deg(theta_max));
+    fprintf('Phi = %.2f degrees\n', rad2deg(phi_max));
+
+    figure;
+    plot_gain_subplot(phi, theta, D);
+    title(sprintf('Directivity at 15 GHz'));
 
 end
