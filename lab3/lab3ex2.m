@@ -14,7 +14,7 @@ HIGH_RES = 10000;
 
 %% MAIN
 lab3_ex2a();
-lab3_ex2b();
+%lab3_ex2b();
 lab3_ex2c();
 lab3_ex2d();
 
@@ -46,7 +46,7 @@ function plot_pattern3D(pattern, THETA, PHI, titleStr)
     zlabel('z');
 
     a=colorbar;
-    a.Label.String = 'Array Factor (dB)';
+    a.Label.String = 'Normalized gain (dB)';
 
     title(titleStr);
     grid on;
@@ -418,6 +418,8 @@ function lab3_ex2d()
     AF_norm = array_factor(dy, dx, PHI, THETA, N, M);
 
     total_pattern = AF_norm .* element_pattern_norm;
+
+    plot_pattern3D(AF_norm, THETA, PHI, 'Array factor (8x8)');
 
     plot_pattern3D(total_pattern, THETA, PHI, ...
         'Antenna factor (8x8)');
