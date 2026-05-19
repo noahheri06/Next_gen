@@ -108,6 +108,7 @@ def directivity_plot(phi, theta, gain):
 
     D = 4*np.pi * gain / total_power
     plot_gain(phi, theta, D)
+    return(D)
 
 
 def plot_2d_cuts(pat_zerophi,pat_90phi,theta):
@@ -191,42 +192,43 @@ def get_beamwidth(pattern,theta):
     return(bw)
 
 
-# if __name__ == "__main__":
-#     l, w = find_L_W(resonant_freq, epsilon_r, substrate_thickness)
-#     phi = np.linspace(0,2*np.pi, 300)
-#     theta = np.linspace(0, 0.5*np.pi, 300)
-#     g_theta_phi = gain(l, w, 15e9, phi, theta)
-#     # print(g_theta_phi)
-#     plot_gain(phi, theta, g_theta_phi)
-#     # plot_gain_slice(phi, 0, theta, g_theta_phi)
-#     # plot_gain_slice(phi, np.pi/4, theta, g_theta_phi)
-#     directivity_plot(phi, theta, g_theta_phi)
-
 if __name__ == "__main__":
-
     l, w = find_L_W(resonant_freq, epsilon_r, substrate_thickness)
-    R_Rad = 90*((epsilon_r**2)/(epsilon_r-1))*((l/w)**2)
-    print(f'R_rad = {R_Rad}')
-    BW = 3.77*((epsilon_r-1)/epsilon_r**2)*(w/l)*((substrate_thickness*15e9)/C)
-    print(f'BW = {BW}')
-    phi = np.linspace(0, 2*np.pi, 300)
-    theta = np.linspace(-0.5*np.pi, 0.5*np.pi, 300)
+    phi = np.linspace(0,2*np.pi, 300)
+    theta = np.linspace(0,0.5*np.pi, 300)
+    g_theta_phi = gain(l, w, 15e9, phi, theta)
+    # print(g_theta_phi)
+    plot_gain(phi, theta, g_theta_phi)
+    # plot_gain_slice(phi, 0, theta, g_theta_phi)
+    # plot_gain_slice(phi, np.pi/4, theta, g_theta_phi)
+    D = directivity_plot(phi, theta, g_theta_phi)
+    print(f"max directivity = {np.max(D)}")
 
-    plot_2d_cuts_side_by_side(l, w, test_frequencies, phi, theta)
+# if __name__ == "__main__":
 
-    g = gain(l, w, 15e9, phi, theta)
+#     l, w = find_L_W(resonant_freq, epsilon_r, substrate_thickness)
+#     R_Rad = 90*((epsilon_r**2)/(epsilon_r-1))*((l/w)**2)
+#     print(f'R_rad = {R_Rad}')
+#     BW = 3.77*((epsilon_r-1)/epsilon_r**2)*(w/l)*((substrate_thickness*15e9)/C)
+#     print(f'BW = {BW}')
+#     phi = np.linspace(0, 2*np.pi, 300)
+#     theta = np.linspace(-0.5*np.pi, 0.5*np.pi, 300)
 
-    index_phi0 = np.argmin(np.abs(phi - 0))
-    index_phi90 = np.argmin(np.abs(phi - np.pi/2))
+#     plot_2d_cuts_side_by_side(l, w, test_frequencies, phi, theta)
 
-    pattern_phi0 = g[:, index_phi0]
-    pattern_phi90 = g[:, index_phi90]
+#     g = gain(l, w, 15e9, phi, theta)
 
-    bw_phi0 = get_beamwidth(pattern_phi0, theta)
-    bw_phi90 = get_beamwidth(pattern_phi90, theta)
+#     index_phi0 = np.argmin(np.abs(phi - 0))
+#     index_phi90 = np.argmin(np.abs(phi - np.pi/2))
 
-    d = 4*np.pi/(np.deg2rad(bw_phi0)*np.deg2rad(bw_phi90))
-    d_db = 10*np.log10(d)
-    print(f"Beamwidth at phi = 0°  : {bw_phi0:.2f} degrees")
-    print(f"Beamwidth at phi = 90° : {bw_phi90:.2f} degrees")
-    print(f'D = {d} or {d_db} dBi')
+#     pattern_phi0 = g[:, index_phi0]
+#     pattern_phi90 = g[:, index_phi90]
+
+#     bw_phi0 = get_beamwidth(pattern_phi0, theta)
+#     bw_phi90 = get_beamwidth(pattern_phi90, theta)
+
+#     d = 4*np.pi/(np.deg2rad(bw_phi0)*np.deg2rad(bw_phi90))
+#     d_db = 10*np.log10(d)
+#     print(f"Beamwidth at phi = 0°  : {bw_phi0:.2f} degrees")
+#     print(f"Beamwidth at phi = 90° : {bw_phi90:.2f} degrees")
+#     print(f'D = {d} or {d_db} dBi')
