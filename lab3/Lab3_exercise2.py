@@ -140,10 +140,10 @@ def calc_sidelobelevel(pattern):
 
 
 
-def plot_2d_cuts(pat_zerophi,pat_90phi,theta):
+def plot_2d_cuts(pat_zerophi,pat_90phi,theta, twentylog=False):
   
-    pat_zerophi_dB = 10*np.log10(pat_zerophi)
-    pat_90phi_dB = 10*np.log10(pat_90phi)
+    pat_zerophi_dB = 20*np.log10(pat_zerophi) if twentylog else 10*np.log10(pat_zerophi)
+    pat_90phi_dB = 20*np.log10(pat_90phi) if twentylog else 10*np.log10(pat_90phi)
 
     fig = plt.figure()
     ax = fig.add_subplot()
@@ -151,7 +151,7 @@ def plot_2d_cuts(pat_zerophi,pat_90phi,theta):
     ax.plot(np.rad2deg(theta),pat_zerophi_dB,label="$\phi$ = 0$\degree$")
     ax.plot(np.rad2deg(theta),pat_90phi_dB,label="$\phi$ = 90$\degree$")
 
-    ax.set_ylim(-70,5)
+    ax.set_ylim(-50,5)
     ax.set_xlabel("$\\theta$ (deg)")
     ax.set_ylabel("normalized AF (dB)")
         
@@ -213,9 +213,9 @@ def lab3_ex2a():
     print(f"The directivity of the antenna is {round(D,3)}, which is {round(10*np.log10(D),4)} dB")
 
     # actual plotting
-    fig,ax = plot_2d_cuts(AF_zerophi, AF_90phi, theta)
+    fig,ax = plot_2d_cuts(AF_zerophi, AF_90phi, theta, twentylog=True)
     
-    ax.set_title("Array Factor")
+    ax.set_title("Array Factor (8x1 array)")
 
     
     
@@ -249,7 +249,7 @@ def lab3_ex2b():
     pattern = patch_antenna(L,W,THETA,PHI)
     pattern_zerophi,pattern_90phi = pattern
     
-    fig,ax = plot_2d_cuts(pattern_zerophi, pattern_90phi, theta)
+    fig,ax = plot_2d_cuts(pattern_zerophi, pattern_90phi, theta, twentylog=False)
     
     ax.set_ylabel("normalized gain (dB)")
     ax.set_title("Patch antenna radiation pattern")
@@ -291,7 +291,7 @@ def lab3_ex2c():
     # calc AF
     AF_norm = array_factor(dy,0,THETA,PHI,8)
     
-    total_norm = element_pattern_norm * AF_norm
+    total_norm = element_pattern_norm * AF_norm**2
 
     # plot 3D
     plot_pattern3D(total_norm, THETA, PHI)
@@ -306,21 +306,21 @@ def lab3_ex2c():
     # element factor
     ef_zerophi,ef_90phi = patch_antenna(L, W, THETA, PHI)
    
-    fig,ax = plot_2d_cuts(ef_zerophi, ef_90phi, theta)
+    fig,ax = plot_2d_cuts(ef_zerophi, ef_90phi, theta,twentylog=False)
     ax.set_ylabel("normalized gain (dB)")
     # array factor
     
     af_zerophi, af_90phi = array_factor(dy, 0, PHI, THETA, N)
     
-    fig,ax = plot_2d_cuts(af_zerophi, af_90phi,theta)
+    fig,ax = plot_2d_cuts(af_zerophi, af_90phi,theta, twentylog=True)
     ax.set_ylabel("normalized AF (dB)")
     
     
-    total_zerophi = ef_zerophi * af_zerophi
-    total_90phi = ef_90phi * af_90phi
+    total_zerophi = ef_zerophi * af_zerophi**2
+    total_90phi = ef_90phi * af_90phi**2
     
     
-    fig,ax = plot_2d_cuts(total_zerophi, total_90phi,theta)
+    fig,ax = plot_2d_cuts(total_zerophi, total_90phi,theta, twentylog=True)
     ax.set_ylabel("normalized gain (dB)")
     ax.set_title("Total radiation pattern (8x1 patch array)")
     
@@ -358,7 +358,7 @@ def lab3_ex2d():
     # calc array factor of 8x8 array
     AF_norm = array_factor(dy, dx, PHI, THETA, N, M=M)
         
-    total_pattern = AF_norm * element_pattern_norm
+    total_pattern = AF_norm**2 * element_pattern_norm
     # PLOTTING
     plot_pattern3D(total_pattern, THETA, PHI,title="Antenna factor (8x8)")
 
@@ -375,8 +375,8 @@ def lab3_ex2d():
     AF_zerophi,AF_90phi = AF_norm
 
 
-    fig,ax = plot_2d_cuts(AF_zerophi, AF_90phi,theta)
-    ax.set_ylabel("normalized array factor (dB)")
+    fig,ax = plot_2d_cuts(AF_zerophi, AF_90phi,theta, twentylog=True)
+    ax.set_ylabel("Normalized array factor (dB)")
     ax.set_title("Array factor (8x8 patch array)")
 
     # element pattern
@@ -385,11 +385,11 @@ def lab3_ex2d():
     # split in zero and 90
     pattern_zerophi, pattern_90phi = element_pattern_norm
     
-    total_zerophi = AF_zerophi * pattern_zerophi
-    total_90phi = AF_90phi * pattern_90phi
+    total_zerophi = AF_zerophi**2 * pattern_zerophi
+    total_90phi = AF_90phi**2 * pattern_90phi
     
-    fig,ax = plot_2d_cuts(total_zerophi, total_90phi,theta)
-    ax.set_ylabel("normalized gain (dB)")
+    fig,ax = plot_2d_cuts(total_zerophi, total_90phi,theta,twentylog=False)
+    ax.set_ylabel("Normalized gain (dB)")
     ax.set_title("Total radiation pattern (8x8 patch array)")
     
     
@@ -443,9 +443,9 @@ def lab3_ex2d():
 if __name__=="__main__":
     
     
-    #lab3_ex2a()
-    #lab3_ex2b()
-    #lab3_ex2c()
+    lab3_ex2a()
+    lab3_ex2b()
+    lab3_ex2c()
     lab3_ex2d()
     
     
