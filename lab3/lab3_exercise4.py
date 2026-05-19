@@ -133,7 +133,7 @@ THETA, PHI = np.meshgrid(theta, phi)
 
 AF_zerophi,AF_90phi = array_factor_taper(dy,0,PHI,THETA,taper_coef,N)
 
-fig,ax = plot_2d_cuts(AF_zerophi,AF_90phi, theta)
+fig,ax = plot_2d_cuts(AF_zerophi,AF_90phi, theta,twentylog=True)
 
 
 AF_zerophi_dB = 20*np.log10(AF_zerophi)
@@ -205,7 +205,7 @@ THETA, PHI = np.meshgrid(theta, phi)
 
 AF_zerophi,AF_90phi = array_factor_taper(dy,dx,PHI,THETA,taper_coef,N, M=M)
 
-fig,ax = plot_2d_cuts(AF_zerophi,AF_90phi, theta)
+fig,ax = plot_2d_cuts(AF_zerophi,AF_90phi, theta, twentylog=True)
 
 
 
@@ -232,7 +232,7 @@ print(f"The beamwidth in the phi=0 plane is {beamwidthzero} deg")
 
 D = 4*np.pi*(180/np.pi)**2 / (beamwidthzero*beamwidth90)
 
-print(f"The directivity of the antenna is {round(D,3)}, which is {round(20*np.log10(D),4)} dB")
+print(f"The directivity of the antenna is {round(D,3)}, which is {round(10*np.log10(D),4)} dB")
 
 
 

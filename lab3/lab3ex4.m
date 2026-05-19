@@ -42,7 +42,7 @@ function plot_pattern3D(pattern, THETA, PHI, titleStr)
     zlabel('z');
 
     a=colorbar;
-    a.Label.String = 'Array Factor (dB)';
+    a.Label.String = 'Normalized array factor (dB)';
 
     title(titleStr);
     grid on;
@@ -298,7 +298,7 @@ fprintf('Amplitude weights:\n');
 disp(taper_coef);
 
 phi   = linspace(0, pi, LOW_RES);
-theta = linspace(-pi, pi, LOW_RES);
+theta = linspace(-pi/2, pi/2, LOW_RES);
 
 [THETA, PHI] = meshgrid(theta, phi);
 

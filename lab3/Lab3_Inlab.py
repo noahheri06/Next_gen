@@ -7,9 +7,11 @@
 import numpy as np
 import skrf as rf
 import matplotlib.pyplot as plt
+
+
 Z0 = 50
 C = 3e8
-R = 1,43
+R = 1.43
 #task1
 
 
@@ -72,10 +74,9 @@ def calc_bandwith(Z_ant, freq):
   return bandwith
 
 def get_horn_gain():
-    freq, S11, S21, S12, S22 = readout_s2p("measurements/Practicum2-1.38m/0.s2p")
+    freq, S11, S21, S12, S22 = readout_s2p("Practicum2-1.38m/0")
 
     c0 = 3e8
-
 
     r = 1.38 # 1, 0.5
     lambd = c0/freq
@@ -154,14 +155,14 @@ def compare(gain, D):
    print(f"The efficiency is equal to {efficiency}")
    return efficiency
 
-def array_plotter(op_frequencie, symtrec = True):
-
+def array_plotter(op_frequencie, array_name, symtrec = True):
+    fig, ax = plt.subplots(1, 1)
     p =[]
 
     if(symtrec):
-        for i in range(46):
+        for i in range(36):
             # print(i)
-            freq, S11, S21, S12, S22 = readout_s2p(f'{i*2}') #get correct name
+            freq, S11, S21, S12, S22 = readout_s2p(f'{array_name}{i*2}') #get correct name
             index = np.where(freq == op_frequencie) ##operating frequency
             #find correct indexis
 
@@ -185,16 +186,16 @@ def array_plotter(op_frequencie, symtrec = True):
             p.append(db[index])
     
     angles = np.linspace(-70, 70, 71)
-    plt.plot(angles, p, label='15 GHz')
-    plt.title("S21 parameter vs angle")
-    plt.grid()
-    plt.xlabel("angle (degrees)")
-    plt.ylabel("Magnitude (dB)")
+    ax.plot(angles, p, label='15 GHz')
+    ax.set_title(f"{array_name} radiation pattern")
+    ax.grid()
+    ax.set_xlabel("angle (degrees)")
+    ax.set_ylabel("Magnitude (dB)")
     plt.legend()
     #plt.savefig("lab3/plots/powerplot.png")
     plt.show()
 
-    indexmax = np.where(p == np.max(p))
+    indexmax = np.where(p == np.max(p))[0]
     anglemax = angles[indexmax]
     print(f"the max angle is {anglemax}")
 
@@ -202,6 +203,8 @@ def array_plotter(op_frequencie, symtrec = True):
 #array_plotter(15e9, False)
 
 #S11**2 = p_ref/p_in
+
+
 
 
 
@@ -237,8 +240,8 @@ for i, antenna in zip(list(range(len(antarrays))),antarrays):
     ax2.plot(freq/1e9,imp,label="Impedance",color="blue")
     
     ax.set_xlabel("Frequency (GHz)")
-    ax.set_ylabel("gain (dB)")
-    ax2.set_ylabel("Impedanec ($\Omega$)")
+    ax.set_ylabel("Gain (dB)")
+    ax2.set_ylabel("Impedance ($\Omega$)")
     ax.grid()
     ax.legend(loc=2, prop={'size': 15})
     ax2.legend(loc=1, prop={'size': 15})
@@ -249,7 +252,7 @@ for i, antenna in zip(list(range(len(antarrays))),antarrays):
     
     
     
-    
+    #%%
 # =============================================================================
 # TASK 4,5,6
 # =============================================================================
@@ -257,6 +260,9 @@ for i, antenna in zip(list(range(len(antarrays))),antarrays):
 # again only one direction is needed
 
 antarrays = ["1x1patch","1x2patch","1x4patch","1x8patcha"]
+
+
+# plot received power (based on S21)
 
 fig, axs = plt.subplots(2, 2)
 #fig.tight_layout()
@@ -270,25 +276,96 @@ for i, antenna in zip(list(range(len(antarrays))),antarrays):
     
     S21 = np.abs(S21)
     
+    power = S21**2
 
     
-    S21_dB = 10*np.log10(S21)
+    power_dB = 10*np.log10(power)
     
-
-    ax.set_title(f"{antenna[:3]} array reflection and impedance")
-    ax.plot(freq/1e9,S21_dB,label="S21 parameter",color="orange")
-
+    
+    ax.set_title(f"{antenna[:3]} array received power")
+    ax.plot(freq/1e9,power_dB,label="Received power")
+    
+    
     
     ax.set_xlabel("Frequency (GHz)")
-    ax.set_ylabel("gain (dB)")
+    ax.set_ylabel("Gain (dB)")
+    ax.grid()
+    #ax.legend(loc=2, prop={'size': 15})
+    plt.show()
+
+
+
+fig, axs = plt.subplots(2, 2)
+#fig.tight_layout()
+plt.subplots_adjust(top=0.95,bottom=0.1,wspace=0.4,hspace=0.4)
+for i, antenna in zip(list(range(len(antarrays))),antarrays):
+    x = i//2
+    y= i % 2
+    ax = axs[x,y]
+    
+    freq, S11, S21, S12, S22 = readout_s2p(antenna)
+    
+   
+    
+    c0 = 3e8
+
+    r = 1.38 # 1, 0.5
+    lambd = c0/freq
+    
+    total_gain = np.abs(S21)**2 * (4*np.pi*r/lambd)**2
+    _, horn_gain = get_horn_gain()
+    array_gain = total_gain/horn_gain
+    
+    array_gain_dB = 10*np.log10(array_gain)
+    
+    #ax2 = ax.twinx()
+
+    ax.set_title(f"{antenna[:3]} array and horn antenna")
+    ax.plot(freq/1e9,array_gain_dB,label="Array gain")
+    # ax.plot(freq/1e9,10*np.log10(horn_gain),label="Horn",color="orange")
+    # ax.plot(freq/1e9,10*np.log10(total_gain),label="Total", color="red")
+    
+    ax.set_xlabel("Frequency (GHz)")
+    ax.set_ylabel("Gain (dB)")
     ax.grid()
     ax.legend(loc=2, prop={'size': 15})
     plt.show()
+    
+    
+    
+    # efficiency calc at 15 GHz
+
+    ind_15GHz = np.where(freq==15e9)[0][0]
+    
+    array_gain_15GHz = array_gain[ind_15GHz]
+    
+    print(f"Gain at 15 GHz: {10*np.log10(array_gain_15GHz)} dB")
+    
+    
 
     
 
 
 
+
+
+
+#%%
+
+# =============================================================================
+# task 7
+# =============================================================================
+
+antennas = ["1x8a","1x8ap","1x8b","1x8c","1x8d"]
+
+
+for antenna in antennas:
+    
+    if antenna=="1x8ap":
+        array_plotter(15e9,antenna,symtrec=False)
+    else:
+        array_plotter(15e9,antenna,symtrec=True)
+    
 
 
 
