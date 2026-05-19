@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from math import floor
+from scipy.optimize import fsolve
 
 C = 2.99e8
 resonant_freq = 15e9
@@ -14,7 +15,7 @@ def find_L_W(fr, er, h):
     delta_L = (0.412*h*(epsilon_eff+0.3)*(w/h+0.264))/((epsilon_eff-0.258)*(w/h+0.8))
     l = L_eff - 2*delta_L
     print(f"Found W and L are: W = {w*1000} mm, L = {l*1000} mm")
-    return (l, w)
+    return (l, w, epsilon_eff)
 
 
 test_frequencies = [14e9, 15e9, 16e9]
@@ -191,42 +192,68 @@ def get_beamwidth(pattern,theta):
     return(bw)
 
 
-# if __name__ == "__main__":
-#     l, w = find_L_W(resonant_freq, epsilon_r, substrate_thickness)
-#     phi = np.linspace(0,2*np.pi, 300)
-#     theta = np.linspace(0, 0.5*np.pi, 300)
-#     g_theta_phi = gain(l, w, 15e9, phi, theta)
-#     # print(g_theta_phi)
-#     plot_gain(phi, theta, g_theta_phi)
-#     # plot_gain_slice(phi, 0, theta, g_theta_phi)
-#     # plot_gain_slice(phi, np.pi/4, theta, g_theta_phi)
-#     directivity_plot(phi, theta, g_theta_phi)
+
+Z0_target = 50          # Ohm
+
+# Equation for Z0
+def microstrip_eq(s):
+    t = (30.67 / s)**0.75
+
+    Z0 = (60 / np.sqrt(e_eff)) * np.log(
+        (6 + (2*np.pi - 6)*np.exp(-t)) / s
+        + np.sqrt(1 + 4/s**2)
+    )
+
+    return Z0 - Z0_target
+
 
 if __name__ == "__main__":
+    l, w, e_eff = find_L_W(resonant_freq, epsilon_r, substrate_thickness)
+    # phi = np.linspace(0,2*np.pi, 300)
+    # theta = np.linspace(0, 0.5*np.pi, 300)
+    # g_theta_phi = gain(l, w, 15e9, phi, theta)
+    # print(g_theta_phi)
+    # plot_gain(phi, theta, g_theta_phi)
+    # # plot_gain_slice(phi, 0, theta, g_theta_phi)
+    # # plot_gain_slice(phi, np.pi/4, theta, g_theta_phi)
+    # directivity_plot(phi, theta, g_theta_phi)
 
-    l, w = find_L_W(resonant_freq, epsilon_r, substrate_thickness)
-    R_Rad = 90*((epsilon_r**2)/(epsilon_r-1))*((l/w)**2)
-    print(f'R_rad = {R_Rad}')
-    BW = 3.77*((epsilon_r-1)/epsilon_r**2)*(w/l)*((substrate_thickness*15e9)/C)
-    print(f'BW = {BW}')
-    phi = np.linspace(0, 2*np.pi, 300)
-    theta = np.linspace(-0.5*np.pi, 0.5*np.pi, 300)
 
-    plot_2d_cuts_side_by_side(l, w, test_frequencies, phi, theta)
 
-    g = gain(l, w, 15e9, phi, theta)
+    s_solution = fsolve(microstrip_eq, 2)[0]
 
-    index_phi0 = np.argmin(np.abs(phi - 0))
-    index_phi90 = np.argmin(np.abs(phi - np.pi/2))
+    w = s_solution *substrate_thickness
 
-    pattern_phi0 = g[:, index_phi0]
-    pattern_phi90 = g[:, index_phi90]
+    print(f"s = w/h = {s_solution:.4f}")
+    print(f"w = {w*1e3:.4f} mm")
+    print(f"w = {w*1e6:.2f} um")
 
-    bw_phi0 = get_beamwidth(pattern_phi0, theta)
-    bw_phi90 = get_beamwidth(pattern_phi90, theta)
 
-    d = 4*np.pi/(np.deg2rad(bw_phi0)*np.deg2rad(bw_phi90))
-    d_db = 10*np.log10(d)
-    print(f"Beamwidth at phi = 0°  : {bw_phi0:.2f} degrees")
-    print(f"Beamwidth at phi = 90° : {bw_phi90:.2f} degrees")
-    print(f'D = {d} or {d_db} dBi')
+# if __name__ == "__main__":
+
+#     l, w, epsilon_eff = find_L_W(resonant_freq, epsilon_r, substrate_thickness)
+#     R_Rad = 90*((epsilon_r**2)/(epsilon_r-1))*((l/w)**2)
+#     print(f'R_rad = {R_Rad}')
+#     BW = 3.77*((epsilon_r-1)/epsilon_r**2)*(w/l)*((substrate_thickness*15e9)/C)
+#     print(f'BW = {BW}')
+#     phi = np.linspace(0, 2*np.pi, 300)
+#     theta = np.linspace(-0.5*np.pi, 0.5*np.pi, 300)
+
+#     plot_2d_cuts_side_by_side(l, w, test_frequencies, phi, theta)
+
+#     g = gain(l, w, 15e9, phi, theta)
+
+#     index_phi0 = np.argmin(np.abs(phi - 0))
+#     index_phi90 = np.argmin(np.abs(phi - np.pi/2))
+
+#     pattern_phi0 = g[:, index_phi0]
+#     pattern_phi90 = g[:, index_phi90]
+
+#     bw_phi0 = get_beamwidth(pattern_phi0, theta)
+#     bw_phi90 = get_beamwidth(pattern_phi90, theta)
+
+#     d = 4*np.pi/(np.deg2rad(bw_phi0)*np.deg2rad(bw_phi90))
+#     d_db = 10*np.log10(d)
+#     print(f"Beamwidth at phi = 0°  : {bw_phi0:.2f} degrees")
+#     print(f"Beamwidth at phi = 90° : {bw_phi90:.2f} degrees")
+#     print(f'D = {d} or {d_db} dBi')
