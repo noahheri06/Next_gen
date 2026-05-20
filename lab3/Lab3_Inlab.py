@@ -52,7 +52,10 @@ def calculate_minusdB_bandwidth(freq, s11_db, threshold=-10):
 
 def calc_op_bandwidth(freq,s11_db,threshold=-10):
     ind_above_10 = np.where(s11_db >= threshold)[0]
-
+    
+    
+    
+    
     lower_max = len(freq)/4
     upper_min = len(freq)/2
     # lower bound
@@ -64,7 +67,7 @@ def calc_op_bandwidth(freq,s11_db,threshold=-10):
     max_freq = freq[upper_ind]
     
     
-    return(max_freq - min_freq)
+    return(max_freq,min_freq)
 
 
 def calc_bandwith(Z_ant, freq):
@@ -191,7 +194,7 @@ def array_plotter(op_frequencie, array_name, symtrec = True):
     ax.grid()
     ax.set_xlabel("angle (degrees)")
     ax.set_ylabel("Magnitude (dB)")
-    plt.legend()
+    #plt.legend()
     #plt.savefig("lab3/plots/powerplot.png")
     plt.show()
 
@@ -226,17 +229,18 @@ for i, antenna in zip(list(range(len(antarrays))),antarrays):
     
     freq, S11, S21, S12, S22 = readout_s2p(antenna)
     
-    S11 = np.abs(S11)
+    S22 = np.abs(S22)
     
-    imp = calc_impedance(S11)
+    imp = calc_impedance(S22)
     
     
-    S11_dB = 10*np.log10(S11)
+    S22_dB = 20*np.log10(S22)
     
 
     ax2 = ax.twinx()
     ax.set_title(f"{antenna[:3]} array reflection and impedance")
-    ax.plot(freq/1e9,S11_dB,label="Reflection coefficient",color="orange")
+    ax.plot(freq/1e9,S22_dB,label="Reflection coefficient",color="orange")
+    ax.axhline(-10,linestyle="--",color="red")
     ax2.plot(freq/1e9,imp,label="Impedance",color="blue")
     
     ax.set_xlabel("Frequency (GHz)")
@@ -247,8 +251,8 @@ for i, antenna in zip(list(range(len(antarrays))),antarrays):
     ax2.legend(loc=1, prop={'size': 15})
     plt.show()
     
-    op_bandwidth = calc_op_bandwidth(freq,S11_dB)/1e9
-    print(f"The operational bandwidth of the {antenna} array is {op_bandwidth} GHz")
+    #op_bandwidth = calc_op_bandwidth(freq,S22_dB)#/1e9
+    #print(f"The operational bandwidth of the {antenna} array is {op_bandwidth} GHz")
     
     
     
@@ -288,7 +292,7 @@ for i, antenna in zip(list(range(len(antarrays))),antarrays):
     
     
     ax.set_xlabel("Frequency (GHz)")
-    ax.set_ylabel("Gain (dB)")
+    ax.set_ylabel("Received power (dB)")
     ax.grid()
     #ax.legend(loc=2, prop={'size': 15})
     plt.show()
