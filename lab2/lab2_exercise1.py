@@ -17,7 +17,7 @@ print(f"1a: The refelction coefficient is: {np.abs(Gamma)**2}")
 # =============================================================================
 # b
 # =============================================================================
-c0 = 299_792_458
+c0 = 3e8
 f = 15e9
 
 lambd = c0/f
@@ -35,11 +35,8 @@ print(f"1b: The input impedane Z_in is = {Zin}")
 
 Pi = 0.1
 
-Ztot = Zg+Zin
-Itot = np.sqrt(Pi/Ztot)
-Pinc = np.abs(Itot)**2 / 2 * np.real(Zin)
-Pl = Pinc * (1-np.abs(Gamma)**2)
-Pr = Pinc * np.abs(Gamma)**2
+Pl = Pi * (1-np.abs(Gamma)**2)
+Pr = Pi * np.abs(Gamma)**2
 
 print(f"1c: Pl = {Pl}, Pr = {Pr}")
 

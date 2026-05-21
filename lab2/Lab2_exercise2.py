@@ -17,9 +17,13 @@ def P_r(f):
     Zg = 50
     G = 10**2
     R = 2
-    Pt = 0.1*(1-np.abs((ZA(f)-Zg)/(ZA(f)+Zg))**2)
-    Pr = Pt * G ** 2 * (3e8/(4*np.pi*f*R))**2
-    return Pr
+    c = 3e8
+    gamma = (ZA(f) - Zg) / (ZA(f) + Zg)
+    mismatch_efficiency = 1 - np.abs(gamma)**2
+    Pt = 0.1 * mismatch_efficiency
+    Pr_available = Pt * (G ** 2) * (c / (4 * np.pi * f * R))**2
+    Pr_delivered = Pr_available * mismatch_efficiency
+    return Pr_delivered
 
 Pr = P_r(freq)
 plt.plot(freq*1e-9, 10*np.log10(Pr)+30)
