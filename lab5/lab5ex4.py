@@ -15,13 +15,13 @@ def create_tones(dists, t, B = 200e6, T = 0.1e-3, amplitudes = np.ones_like(DIST
         for i, dist in enumerate(dists):
             tau_n = 2*dist/C
             exponent = 1j*2*np.pi*(B/T)*t[j]*tau_n
-            S_beat = np.real(np.exp(exponent))*amplitudes[i]
+            S_beat = np.exp(exponent)*amplitudes[i]
             S_beats.append(S_beat)
         
         all_S_beats.append(S_beats)
     
-
-    received_signal = np.sum(all_S_beats, axis=1)
+    all_S_beats = np.sum(all_S_beats, axis=1)
+    received_signal = np.real(all_S_beats)
 
     return all_S_beats, received_signal
 
@@ -79,6 +79,7 @@ def recalc_dists_from_signal(received_signal, sampling_rate, B, T):
 def plot_power_spectra(received_signal, sampling_rate, dB = False, calc_freqs = False, calc_dists = False, dists = [], B =0, T =0):
     received_fft = fft.fft(received_signal)
     power_spectrum = np.abs(received_fft)**2
+
     power_db = 10*np.log10(power_spectrum)
 
     freq_axis = fft.fftfreq(len(power_spectrum), d=1/sampling_rate)
@@ -105,16 +106,29 @@ def plot_power_spectra(received_signal, sampling_rate, dB = False, calc_freqs = 
     plt.grid()
     plt.show()
 
+def calc_signal_power(received_signal, time):
+    abs_square = np.abs(received_signal)**2
+    power = abs_square/time
+    return power
 
+def create_noise_signal(received_signal, measuring_time, snr_db):
+    signal_power = calc_signal_power(received_signal, measuring_time)
+    snr_factor = 10**(snr_db/10)
+    noise_power = signal_power*snr_factor
+
+    samples = len(received_signal)
+    noise = np.random.normal(size = samples) + 1j*np.random.normal(size= samples)
+    noise = noise*(noise_power**(1/2))/2
+    return noise
 
 def task1():
     sampling_rate = 500e6
-    measuring_time = 0.0001 ##start taking really long if larger than 0.001
+    measuring_time = 0.1e-3  ##start taking really long if larger than 0.001
     samples = measuring_time*sampling_rate
     t_axis = np.linspace(0, measuring_time, int(samples))
     s_beats, received_signal = create_tones(DISTS, t_axis)
 
-    plot_power_spectra(received_signal, sampling_rate, 
+    plot_power_spectra(s_beats, sampling_rate, 
                        calc_freqs=True, calc_dists=True,
                        dists=DISTS, B =200e6, T = 0.1e-3)
     
@@ -125,20 +139,48 @@ def task1():
 
 def task2():
     sampling_rate = 500e6
-    measuring_time = 0.001 ##start taking really long if larger than 0.001
+    measuring_time = 0.1e-3  ##start taking really long if larger than 0.001
     samples = measuring_time*sampling_rate
     t_axis = np.linspace(0, measuring_time, int(samples))
 
     amplitudes = calc_amplitudes(DISTS, reference_0 = False)
 
-    __, received_signal = create_tones(DISTS, t_axis, amplitudes= amplitudes)
+    s_beats, received_signal = create_tones(DISTS, t_axis, amplitudes= amplitudes)
 
-    plot_power_spectra(received_signal, sampling_rate, 
+    plot_power_spectra(s_beats, sampling_rate, 
                        calc_freqs=True, calc_dists=True,
                        dists=DISTS, B =200e6, T = 0.1e-3)
 
 
 
+def task3():
+    sampling_rate = 500e6
+    measuring_time = 0.1e-3 ##start taking really long if larger than 0.001
+    snr_db = -30 #(dB)
+
+    samples = measuring_time*sampling_rate
+    t_axis = np.linspace(0, measuring_time, int(samples))
+
+    amplitudes = calc_amplitudes(DISTS, reference_0 = False)
+
+    s_beats, received_signal = create_tones(DISTS, t_axis, amplitudes= amplitudes)
+    print(s_beats)
+
+
+    noise_signal = create_noise_signal(s_beats, measuring_time, snr_db)
+
+    s_with_noise = s_beats + noise_signal
+
+    
+
+    plot_power_spectra(s_with_noise, sampling_rate, 
+                       calc_freqs=True, calc_dists=True,
+                       dists=DISTS, B =200e6, T = 0.1e-3)
+    return "Fuck you"
+
+
+
 if __name__ == "__main__":
     #task1()
-    task2()
+    #task2()
+    task3()
