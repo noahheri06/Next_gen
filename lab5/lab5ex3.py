@@ -41,12 +41,12 @@ signalC_fft = data6['sig_C_fft'].flatten()
 freq = data7['freqaxis'].flatten()
 time = data8['t'].flatten()
 
-print("Signal A shape: ", np.abs(signalA).shape)
-print("Signal B shape: ", np.abs(signalB).shape)
-print("Signal C shape: ", np.abs(signalC).shape)
-print(signalA[0:10])
-print(signalB[0:10])
-print(signalC[0:10])
+print("Signal A shape: ", np.real(signalA).shape)
+print("Signal B shape: ", np.real(signalB).shape)
+print("Signal C shape: ", np.real(signalC).shape)
+print("FFT of Signal A shape: ", signalA_fft.shape)
+print("FFT of Signal B shape: ", signalB_fft.shape)
+print("FFT of Signal C shape: ", signalC_fft.shape)
 
 # Plotting
 fig, axes = plt.subplots(3, 2, figsize=(12, 10))
@@ -70,10 +70,16 @@ axes[2, 0].plot(time/1e-3, np.real(signalC))
 axes[2, 0].set_title("Signal C")
 axes[2, 0].set_xlabel("Time (ms)")
 axes[2, 0].set_ylabel("Amplitude")
-axes[2, 1].plot(freq/1e6, np.abs(signalC_fft))
+# axes[2, 1].plot(freq/1e6, np.abs(signalC_fft[0:200000]))
+axes[2, 1].plot(freq/1e6, np.abs(np.fft.fft(signalC)[0:200000])) ##can replace this later with the correct file on bs
 axes[2, 1].set_title("FFT of Signal C")
 axes[2, 1].set_xlabel("Frequency (MHz)")
 axes[2, 1].set_ylabel("Magnitude")
 plt.tight_layout()
 plt.savefig("plots/3b.png")
 plt.show()
+
+
+#====================
+# task C
+#====================
