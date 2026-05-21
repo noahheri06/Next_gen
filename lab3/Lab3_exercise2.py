@@ -5,11 +5,11 @@ from math import floor
 from scipy.signal import find_peaks
 
 c=3e8
-f = 15e9
+f = 15.69e9
 lambd = c/f
 k0 = 2*np.pi/lambd
 
-dy = lambd/2
+dy = 0.5* lambd
 
 
 LOW_RES = 500
@@ -301,7 +301,7 @@ def lab3_ex2c():
     element_pattern_norm = patch_antenna(L,W,THETA,PHI)
     
     # calc AF
-    AF_norm = array_factor(dy,0,THETA,PHI,8)
+    AF_norm = array_factor(dy,0,THETA,PHI,N)
     
     total_norm = element_pattern_norm * AF_norm**2
 
@@ -473,10 +473,10 @@ def lab3_ex2d():
 if __name__=="__main__":
     
     
-    lab3_ex2a()
-    lab3_ex2b()
+    #lab3_ex2a()
+    #lab3_ex2b()
     lab3_ex2c()
-    lab3_ex2d()
+    #lab3_ex2d()
     
     
 

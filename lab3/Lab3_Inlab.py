@@ -51,9 +51,9 @@ def calculate_minusdB_bandwidth(freq, s11_db, threshold=-10):
 
 
 def calc_op_bandwidth(freq,s11_db,threshold=-10):
-    ind_above_10 = np.where(s11_db >= threshold)[0]
     
     
+    return(freq[:-1][np.diff(s11_db >= threshold)])
     
     
     lower_max = len(freq)/4
@@ -158,8 +158,8 @@ def compare(gain, D):
    print(f"The efficiency is equal to {efficiency}")
    return efficiency
 
-def array_plotter(op_frequencie, array_name, symtrec = True):
-    fig, ax = plt.subplots(1, 1)
+def array_plotter(fig,ax,op_frequencie, array_name, symtrec = True):
+    #fig, ax = plt.subplots(1, 1)
     p =[]
 
     if(symtrec):
@@ -251,8 +251,8 @@ for i, antenna in zip(list(range(len(antarrays))),antarrays):
     ax2.legend(loc=1, prop={'size': 15})
     plt.show()
     
-    #op_bandwidth = calc_op_bandwidth(freq,S22_dB)#/1e9
-    #print(f"The operational bandwidth of the {antenna} array is {op_bandwidth} GHz")
+    op_bandwidth = calc_op_bandwidth(freq,S22_dB)#/1e9
+    print(f"The operational bandwidth of the {antenna} array is {op_bandwidth} GHz")
     
     
     
@@ -298,6 +298,9 @@ for i, antenna in zip(list(range(len(antarrays))),antarrays):
     plt.show()
 
 
+directivities = [4.149, 6.272, 11.784, 23.201]
+#                1x1   1x2    1x4    1x8
+
 
 fig, axs = plt.subplots(2, 2)
 #fig.tight_layout()
@@ -342,9 +345,17 @@ for i, antenna in zip(list(range(len(antarrays))),antarrays):
     ind_15GHz = np.where(freq==15e9)[0][0]
     
     array_gain_15GHz = array_gain[ind_15GHz]
+    max_array_gain = np.max(array_gain)
+    ind_max = np.where(array_gain==max_array_gain)[0][0]
+    max_freq = freq[ind_max]/1e9
     
-    print(f"Gain at 15 GHz: {10*np.log10(array_gain_15GHz)} dB")
+    efficiency = max_array_gain/directivities[i]
     
+    print(f"efficiency for {antenna} array: {efficiency}")
+    #print(f"max freq for {antenna} array is {max_freq} GHz, with gain {10*np.log10(max_array_gain)} dB")
+    
+    print(f"Gain at 15 GHz for {antenna} array: {10*np.log10(array_gain_15GHz)} dB")
+    print(f"Directivity at 15 GHz for {antenna} array: {10*np.log10(directivities[i])} dB")
     
 
     
@@ -361,14 +372,23 @@ for i, antenna in zip(list(range(len(antarrays))),antarrays):
 # =============================================================================
 
 antennas = ["1x8a","1x8ap","1x8b","1x8c","1x8d"]
+antennas = ["1x8a","1x8b","1x8c","1x8d"]
 
+fig, axs = plt.subplots(2, 2)
+#fig.tight_layout()
+plt.subplots_adjust(top=0.95,bottom=0.1,wspace=0.4,hspace=0.4)
 
-for antenna in antennas:
+for i, antenna in zip(list(range(len(antennas))),antennas):
+    x = i//2
+    y= i % 2
+    ax = axs[x,y]
+    
+    
     
     if antenna=="1x8ap":
-        array_plotter(15e9,antenna,symtrec=False)
+        array_plotter(fig,ax,15e9,antenna,symtrec=False)
     else:
-        array_plotter(15e9,antenna,symtrec=True)
+        array_plotter(fig,ax,15e9,antenna,symtrec=True)
     
 
 

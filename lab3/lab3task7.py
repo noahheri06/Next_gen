@@ -11,7 +11,7 @@ R = 1.43
 
 def readout_s2p(your_file):
 
-  ntwk = rf.Network(f'lab3/measurements/{your_file}.s2p')
+  ntwk = rf.Network(f'measurements/{your_file}.s2p')
 
   # Frequency (Hz)
   freq = ntwk.f
@@ -43,9 +43,8 @@ def gain(l, w, freq, phi, theta):
             print(g)
     return (g)
 
-def array_plotter_correct_for_theo (op_frequencie, array_name, symtrec = True):
-    fig, ax = plt.subplots(1, 1)
-    p =[]
+def array_plotter_correct_for_theo(fig, ax,op_frequencie, array_name, symtrec = True):
+    p =[] 
 
     if(symtrec):
         for i in range(36):
@@ -91,7 +90,7 @@ def array_plotter_correct_for_theo (op_frequencie, array_name, symtrec = True):
     ax.grid()
     ax.set_xlabel("angle (degrees)")
     ax.set_ylabel("Magnitude (dB)")
-    plt.legend()
+    #plt.legend()
     #plt.savefig("lab3/plots/powerplot.png")
     plt.show()
 
@@ -100,12 +99,24 @@ def array_plotter_correct_for_theo (op_frequencie, array_name, symtrec = True):
     print(f"the max angle is {anglemax}")
 
 
+        
+        
 antennas = ["1x8a","1x8ap","1x8b","1x8c","1x8d"]
+antennas = ["1x8a","1x8b","1x8c","1x8d"]
+antennas = ["1x8ap"]
+fig, axs = plt.subplots(1, 1)
+#fig.tight_layout()
+plt.subplots_adjust(top=0.95,bottom=0.1,wspace=0.4,hspace=0.4)
 
-for antenna in antennas:
+for i, antenna in zip(list(range(len(antennas))),antennas):
+    x = i//2
+    y= i % 2
+    ax = axs
+    
+    
     
     if antenna=="1x8ap":
-        array_plotter_correct_for_theo(15e9,antenna,symtrec=False)
+        array_plotter_correct_for_theo(fig,ax,15e9,antenna,symtrec=False)
     else:
-        array_plotter_correct_for_theo(15e9,antenna,symtrec=True)
+        array_plotter_correct_for_theo(fig,ax,15e9,antenna,symtrec=True)
     
