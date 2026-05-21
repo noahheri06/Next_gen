@@ -65,6 +65,10 @@ betayz = k*lambda_range/ly
 D = 4*np.pi/(betaxz*betayz)
 plt.plot(freq_range, D)
 plt.title("directivity vs freq")
+plt.xlabel("Frequency (Hz)")
+plt.ylabel("Directivity")
+plt.grid()
+plt.savefig("plots/3b.png")
 plt.show()
 
 
@@ -95,5 +99,6 @@ fig.supxlabel("Frequency")
 fig.supylabel("Directivity")
 
 plt.tight_layout()
+plt.savefig("plots/3d.png")
 plt.show()
 
