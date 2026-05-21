@@ -70,7 +70,7 @@ def initialize_Pluto_TDD(PlutoIP,sample_rate,center_freq,rx_gain,tx_gain,rx_time
     tddn.channel[2].polarity = 0
     tddn.channel[2].enable = 1
 
-    tddn.sync_external = True  # enable external sync trigger
+    tddn.sync_external = False  # use software trigger mode # was True
     tddn.enable = True  # enable TDD engine
     
     print("SDR Configuration Completed")
