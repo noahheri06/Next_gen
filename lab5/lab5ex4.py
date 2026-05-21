@@ -1,9 +1,9 @@
 import numpy as np
-from scipy import fft
+from scipy import fft, signal
 import matplotlib.pyplot as plt
 
 
-DISTS = [5,8,12] ## assumed to be sorted
+DISTS = [5, 8, 12] ## assumed to be sorted
 C = 3e8
 
 def create_tones(dists, t, B = 200e6, T = 0.1e-3, amplitudes = np.ones_like(DISTS)):
@@ -17,7 +17,8 @@ def create_tones(dists, t, B = 200e6, T = 0.1e-3, amplitudes = np.ones_like(DIST
             exponent = 1j*2*np.pi*(B/T)*t[j]*tau_n
             S_beat = np.real(np.exp(exponent))*amplitudes[i]
             S_beats.append(S_beat)
-            all_S_beats.append(S_beats)
+        
+        all_S_beats.append(S_beats)
     
 
     received_signal = np.sum(all_S_beats, axis=1)
@@ -29,7 +30,7 @@ def calc_amplitudes(dists, rcses = False, reference_0 = True):
 
     if (reference_0 == False):
         at_zero = (4*np.pi*(dists[0]**2))**2
-        print(at_zero)
+        #print(at_zero)
         amplitudes = amplitudes*at_zero
         
     # print(amplitudes)
@@ -46,9 +47,36 @@ def calc_amplitudes(dists, rcses = False, reference_0 = True):
 
     return amplitudes
 
-def calc_expected_freqs():
+def calc_expected_freqs(dists, B, T):
+    freqs = np.zeros_like(dists)
+    for i, dist in enumerate(dists):
+        freqs[i] = 2*B*dist/(C*T)
+    print(f"The expected frequencies are {freqs}")
+    return freqs
 
-def plot_power_spectra(received_signal, sampling_rate, dB = False):
+def recalc_dists_from_signal(received_signal, sampling_rate, B, T):
+    received_fft = fft.fft(received_signal)
+    power_spectrum = np.abs(received_fft)**2
+    freq_axis = fft.fftfreq(len(power_spectrum), d=1/sampling_rate)
+    
+    peaks_index = signal.find_peaks(power_spectrum)
+
+    freqs = np.zeros_like(peaks_index[0])
+    for i, index in enumerate(peaks_index[0]):
+        freqs[i] = freq_axis[index]
+
+
+    print(f"The found frequencies are {freqs}")
+
+    dists = np.zeros_like(freqs)
+    for i, freq in enumerate(freqs):
+        dists[i] = (C*T*freq)/(2*B)
+    
+    print(f"The found distances are {dists}")
+    return dists
+
+
+def plot_power_spectra(received_signal, sampling_rate, dB = False, calc_freqs = False, calc_dists = False, dists = [], B =0, T =0):
     received_fft = fft.fft(received_signal)
     power_spectrum = np.abs(received_fft)**2
     power_db = 10*np.log10(power_spectrum)
@@ -63,7 +91,15 @@ def plot_power_spectra(received_signal, sampling_rate, dB = False):
         plt.plot(freq_axis[:len(freq_axis)//2], power_spectrum[:len(power_spectrum)//2])
         plt.ylabel("Power (Watt)")
     
-    plt.xlim(0, 100e3)
+    if (calc_freqs == True):
+        freqs = calc_expected_freqs(dists, B, T)    
+        for i, freq in enumerate(freqs):
+            plt.axvline(freq)
+
+    if (calc_dists == True):
+        found_dists = recalc_dists_from_signal(received_signal, sampling_rate, B, T)
+
+    plt.xlim(0, 400e3)
     plt.xlabel("Frequency [Hz]")
     plt.title("FFT of measured powers")
     plt.grid()
@@ -73,12 +109,16 @@ def plot_power_spectra(received_signal, sampling_rate, dB = False):
 
 def task1():
     sampling_rate = 500e6
-    measuring_time = 0.001 ##start taking really long if larger than 0.001
+    measuring_time = 0.0001 ##start taking really long if larger than 0.001
     samples = measuring_time*sampling_rate
     t_axis = np.linspace(0, measuring_time, int(samples))
     s_beats, received_signal = create_tones(DISTS, t_axis)
 
-    plot_power_spectra(received_signal, sampling_rate)
+    plot_power_spectra(received_signal, sampling_rate, 
+                       calc_freqs=True, calc_dists=True,
+                       dists=DISTS, B =200e6, T = 0.1e-3)
+    
+
 
 
     #print(s_beats)
@@ -93,11 +133,12 @@ def task2():
 
     __, received_signal = create_tones(DISTS, t_axis, amplitudes= amplitudes)
 
-
-    plot_power_spectra(received_signal, sampling_rate)
+    plot_power_spectra(received_signal, sampling_rate, 
+                       calc_freqs=True, calc_dists=True,
+                       dists=DISTS, B =200e6, T = 0.1e-3)
 
 
 
 if __name__ == "__main__":
-    task1()
+    #task1()
     task2()
