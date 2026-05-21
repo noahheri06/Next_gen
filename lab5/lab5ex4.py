@@ -178,9 +178,36 @@ def task3():
                        dists=DISTS, B =200e6, T = 0.1e-3)
     return "Fuck you"
 
+def task4():
+    sampling_rate = 500e6
+    measuring_time = 0.1e-3 ##start taking really long if larger than 0.001
+    snr_db = -30 #(dB)
+    k = 50
 
+    samples = measuring_time*sampling_rate
+    t_axis = np.linspace(0, measuring_time, int(samples))
+
+    amplitudes = calc_amplitudes(DISTS, reference_0 = False)
+
+    s_beats, received_signal = create_tones(DISTS, t_axis, amplitudes= amplitudes)
+    print(s_beats)
+
+    s_average = np.zeros_like(s_beats)
+    for i in range(k):
+        noise_signal = create_noise_signal(s_beats, measuring_time, snr_db)
+        s_with_noise = s_beats + noise_signal
+        s_average = s_average + s_with_noise
+    s_average = s_average
+
+    
+
+    plot_power_spectra(s_average, sampling_rate, 
+                       calc_freqs=True, calc_dists=True,
+                       dists=DISTS, B =200e6, T = 0.1e-3)
+    return "Fuck you"
 
 if __name__ == "__main__":
     #task1()
     #task2()
-    task3()
+    #task3():
+    task4()
