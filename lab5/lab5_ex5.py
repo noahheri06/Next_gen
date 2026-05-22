@@ -24,7 +24,7 @@ tx_gain = -10
 rx_gain = 10
 
 # Radar waveform parameters
-B = 25e6
+B = 5e6
 T = 100e-6
 f0 = 2.5e9
 fs = PlutoSamprate
@@ -57,7 +57,7 @@ plt.ylabel("Amplitude")
 plt.grid()
 plt.show()
 
-beat_signal = added_result * np.conj(sig_A)
+beat_signal = np.conj(added_result) * sig_A
 beat_signal = lowpass_filter(beat_signal, fs, cutoff=400e3)
 beat_fft = np.fft.fftshift(np.fft.fft(beat_signal))
 freq_axis = np.fft.fftshift(np.fft.fftfreq(len(beat_signal), d=1/fs))
@@ -84,7 +84,7 @@ plt.show()
 
 ##adding zero padding to improve range resolution
 
-beat_signal = added_result * np.conj(sig_A)
+beat_signal = np.conj(added_result) * sig_A
 beat_signal = lowpass_filter(beat_signal, fs, cutoff=400e3)
 zero_pad_factor = 5
 nfft = len(beat_signal) * zero_pad_factor
