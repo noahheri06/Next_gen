@@ -24,7 +24,7 @@ tx_gain = -10
 rx_gain = 10
 
 # Radar waveform parameters
-B = 5e6
+B = 25e6
 T = 100e-6
 f0 = 2.5e9
 fs = PlutoSamprate
@@ -34,7 +34,7 @@ c = 3e8
 N = int(round(T * fs))
 t = np.arange(N) / fs
 rx_time_ms = 1000.0 * N / PlutoSamprate
-my_sdr, tddn = initialize_Pluto_TDD(Pluto_IP, PlutoSamprate, f0, rx_gain, tx_gain, rx_time_ms)
+my_sdr, tddn = initialize_Pluto_TDD(Pluto_IP, PlutoSamprate, f0, rx_gain, tx_gain, rx_time_ms, rx_samples=N)
 
 #chirp generation
 k = B / T
@@ -58,15 +58,54 @@ plt.grid()
 plt.show()
 
 beat_signal = added_result * np.conj(sig_A)
-beat_signal = lowpass_filter(beat_signal, fs, cutoff=1e6)
+beat_signal = lowpass_filter(beat_signal, fs, cutoff=400e3)
 beat_fft = np.fft.fftshift(np.fft.fft(beat_signal))
 freq_axis = np.fft.fftshift(np.fft.fftfreq(len(beat_signal), d=1/fs))
 range_axis = (freq_axis * c) / (2 * k)
 plt.figure()
+plt.subplot(2, 1, 1)
 plt.plot(freq_axis, np.abs(beat_fft))
 plt.title("FFT of the beat signal")
 plt.xlabel("Frequency (Hz)")
 plt.ylabel("Magnitude")
-# plt.xlim(-1, 1)
+plt.xlim(-0.06*B, 0.06*B)
 plt.grid()
+plt.subplot(2, 1, 2)
+plt.plot(range_axis, np.abs(beat_fft))
+plt.title("Range Profile")
+plt.xlabel("Range (m)")
+plt.ylabel("Magnitude")
+plt.xlim(-1500, 1500)
+plt.grid()
+plt.tight_layout()
+plt.savefig(os.path.join(save_path, f"range_profile_{B/1e6:.1f}MHz.png"))
+plt.show()
+
+
+##adding zero padding to improve range resolution
+
+beat_signal = added_result * np.conj(sig_A)
+beat_signal = lowpass_filter(beat_signal, fs, cutoff=400e3)
+zero_pad_factor = 5
+nfft = len(beat_signal) * zero_pad_factor
+beat_fft = np.fft.fftshift(np.fft.fft(beat_signal, n=nfft))
+freq_axis = np.fft.fftshift(np.fft.fftfreq(nfft, d=1/fs))
+range_axis = (freq_axis * c) / (2 * k)
+plt.figure()
+plt.subplot(2, 1, 1)
+plt.plot(freq_axis, np.abs(beat_fft))
+plt.title("FFT of the zero-padded beat signal")
+plt.xlabel("Frequency (Hz)")
+plt.ylabel("Magnitude")
+plt.xlim(-0.06*B, 0.06*B)
+plt.grid()
+plt.subplot(2, 1, 2)
+plt.plot(range_axis, np.abs(beat_fft))
+plt.title("Range Profile (zero padded)")
+plt.xlabel("Range (m)")
+plt.ylabel("Magnitude")
+plt.xlim(-1500, 1500)
+plt.grid()
+plt.tight_layout()
+plt.savefig(os.path.join(save_path, f"range_profile_padded_{B/1e6:.1f}MHz.png"))
 plt.show()
