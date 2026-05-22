@@ -38,6 +38,7 @@ plt.title("Real part of the averaged received signal")
 plt.xlabel("Sample index")
 plt.ylabel("Amplitude")
 plt.grid()
+plt.xlim(0, 800)
 plt.show()
 
 
