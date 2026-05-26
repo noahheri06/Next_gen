@@ -7,7 +7,7 @@ Created on Wed Mar 26 15:04:54 2025
 
 import adi
 
-def initialize_Pluto_TDD(PlutoIP,sample_rate,center_freq,rx_gain,tx_gain,rx_time_ms):
+def initialize_Pluto_TDD(PlutoIP,sample_rate,center_freq,rx_gain,tx_gain,rx_time_ms,rx_samples):
     
     # %% Setup SDR
     PlutoIP = 'ip:'+PlutoIP
@@ -45,9 +45,7 @@ def initialize_Pluto_TDD(PlutoIP,sample_rate,center_freq,rx_gain,tx_gain,rx_time
 
     frame_length_ms = rx_time_ms
 
-    frame_length_samples = int((rx_time_ms / 1000) * my_sdr.sample_rate)
-    N_rx = int(1 * frame_length_samples)
-    my_sdr.rx_buffer_size = N_rx
+    my_sdr.rx_buffer_size = rx_samples
 
     tddn.startup_delay_ms = 0
     tddn.frame_length_ms = frame_length_ms
@@ -70,7 +68,7 @@ def initialize_Pluto_TDD(PlutoIP,sample_rate,center_freq,rx_gain,tx_gain,rx_time
     tddn.channel[2].polarity = 0
     tddn.channel[2].enable = 1
 
-    tddn.sync_external = True  # enable external sync trigger
+    tddn.sync_external = False  # use software trigger mode # was True
     tddn.enable = True  # enable TDD engine
     
     print("SDR Configuration Completed")

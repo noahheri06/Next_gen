@@ -34,11 +34,22 @@ def pluto_transmit_receive(my_sdr, tddn, iq, capture_range, frame_length_samples
     print(f"TDD_frame time[raw]: {tddn.frame_length_raw}")
     
     # Initialize the array used to store the received data
-    received_array = np.zeros((capture_range, frame_length_samples), dtype=complex) * 1j
+    received_array = np.zeros((capture_range, frame_length_samples), dtype=np.complex64)
 
     # Receive data
     for r in range(capture_range):
-        received_array[r] = my_sdr.rx()
+        rx_data = np.asarray(my_sdr.rx(), dtype=np.complex64)
+        if rx_data.shape[0] != frame_length_samples:
+            if rx_data.shape[0] < frame_length_samples:
+                unpadded_length = rx_data.shape[0]
+                padded = np.zeros(frame_length_samples, dtype=np.complex64)
+                padded[: rx_data.shape[0]] = rx_data
+                rx_data = padded
+                print(f"Warning: frame {r} shorter ({unpadded_length}) -> padded to {frame_length_samples}")
+            else:
+                rx_data = rx_data[:frame_length_samples]
+                print(f"Warning: frame {r} longer ({rx_data.shape[0]}) -> truncated to {frame_length_samples}")
+        received_array[r] = rx_data
 
     # Shutdown Pluto transmission
     tddn.enable = 0
