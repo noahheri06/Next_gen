@@ -8,10 +8,10 @@ import numpy as np
 def to_linear(x):
     return(10**(x/10))
 
-models = {"A":{"Tx power":25000,"Gain":36, "Carrier Frequency":9.4},
-          "B":{"Tx power":250000,"Gain":31, "Carrier Frequency":9.4},
-          "C":{"Tx power":250000,"Gain":31, "Carrier Frequency":2.8},
-          "D":{"Tx power":250000,"Gain":36, "Carrier Frequency":9.4}}
+models = {"A":{"Tx power":25_000,"Gain":36, "Carrier Frequency":9.4},
+          "B":{"Tx power":250_000,"Gain":31, "Carrier Frequency":9.4},
+          "C":{"Tx power":250_000,"Gain":31, "Carrier Frequency":2.8},
+          "D":{"Tx power":250_000,"Gain":36, "Carrier Frequency":9.4}}
 
 SNR_results = {}
 
