@@ -76,15 +76,19 @@ def recalc_dists_from_signal(received_signal, sampling_rate, B, T):
     return dists
 
 
-def plot_power_spectra(received_signal, sampling_rate, dB = False, calc_freqs = False, calc_dists = False, dists = [], B =0, T =0):
+def plot_power_spectra(received_signal, sampling_rate, dB = False, calc_freqs = False, calc_dists = False, dists = [], B =0, T =0, use_range_axis = False):
     received_fft = fft.fft(received_signal)
-    power_spectrum = np.abs(received_fft)**2
 
+    power_spectrum = np.abs(received_fft)**2
     power_db = 10*np.log10(power_spectrum)
 
     freq_axis = fft.fftfreq(len(power_spectrum), d=1/sampling_rate)
+    range_axis = freq_axis*C*T/(2*B)
+    print(range_axis[])
+
 
     plt.figure(figsize=(10,5))
+
     if (dB == True):
         plt.plot(freq_axis[:len(freq_axis)//2], power_db[:len(power_db)//2])
         plt.ylabel("Power (dB)")
@@ -207,7 +211,10 @@ def task4():
     return "Fuck you"
 
 if __name__ == "__main__":
-    #task1()
+    task1()
     #task2()
-    #task3():
-    task4()
+    #task3()
+    #task4()
+    # calc_expected_freqs([0.2], 5e6, 1e-4)
+
+    print("Done")
