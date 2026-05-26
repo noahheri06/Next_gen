@@ -66,7 +66,7 @@ print(f"The model with the highest SNR is model {max_SNR_model}")
 
 alpha = 0.05 # dB/km attenuation
 
-total_att_dB = alpha * 2 * R/1e3
+total_att_dB = alpha * R/1e3
 
 L_s = to_linear(total_att_dB)
 print(f"L_s = {L_s}")
@@ -74,10 +74,3 @@ print(f"L_s = {L_s}")
 n_p = int(np.ceil(L_s))
 
 print(f"The amount of pulses needed to compensate for the atmospheric propagation losses is: {n_p}")
-
-
-
-
-
-
-
