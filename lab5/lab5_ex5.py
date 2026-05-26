@@ -48,6 +48,9 @@ capture_range = 100
 results = np.array(pluto_transmit_receive(my_sdr, tddn, tx_waveform, capture_range, frame_length_samples, save_path))
 my_sdr.close()
 
+# stored_results = mat = scipy.io.loadmat('pluto_data/received_data.mat')['received_data']
+# added_result = np.sum(stored_results, axis=0) / capture_range
+
 added_result = np.sum(results, axis=0) / capture_range
 plt.figure()
 plt.plot(np.real(added_result))
