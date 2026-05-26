@@ -31,13 +31,13 @@ def calc_amplitudes(dists, rcses = False, reference_0 = True):
     if (reference_0 == False):
         at_zero = (4*np.pi*(dists[0]**2))**2
         #print(at_zero)
-        amplitudes = amplitudes*at_zero
+        amplitudes = amplitudes * at_zero
         
     # print(amplitudes)
 
     for i, dist in enumerate(dists):
         correction_factor = 1/((4*np.pi*(dist**2))**2)
-        amplitudes[i] = amplitudes[i]*correction_factor
+        amplitudes[i] = amplitudes[i] * correction_factor
     
     # print(amplitudes)
 
@@ -90,7 +90,7 @@ def plot_power_spectra(received_signal, sampling_rate, dB = False, calc_freqs = 
         plt.ylabel("Power (dB)")
     else:
         plt.plot(freq_axis[:len(freq_axis)//2], power_spectrum[:len(power_spectrum)//2])
-        plt.ylabel("Power (Watt)")
+        plt.ylabel("Power (W)")
     
     if (calc_freqs == True):
         freqs = calc_expected_freqs(dists, B, T)    
@@ -101,7 +101,7 @@ def plot_power_spectra(received_signal, sampling_rate, dB = False, calc_freqs = 
         found_dists = recalc_dists_from_signal(received_signal, sampling_rate, B, T)
 
     plt.xlim(0, 400e3)
-    plt.xlabel("Frequency [Hz]")
+    plt.xlabel("Frequency (Hz)")
     plt.title("FFT of measured powers")
     plt.grid()
     plt.show()
@@ -114,7 +114,7 @@ def calc_signal_power(received_signal, time):
 def create_noise_signal(received_signal, measuring_time, snr_db):
     signal_power = calc_signal_power(received_signal, measuring_time)
     snr_factor = 10**(snr_db/10)
-    noise_power = signal_power*snr_factor
+    noise_power = signal_power/snr_factor
 
     samples = len(received_signal)
     noise = np.random.normal(size = samples) + 1j*np.random.normal(size= samples)
@@ -124,12 +124,12 @@ def create_noise_signal(received_signal, measuring_time, snr_db):
 def task1():
     sampling_rate = 500e6
     measuring_time = 0.1e-3  ##start taking really long if larger than 0.001
-    samples = measuring_time*sampling_rate
+    samples = measuring_time * sampling_rate
     t_axis = np.linspace(0, measuring_time, int(samples))
     s_beats, received_signal = create_tones(DISTS, t_axis)
 
     plot_power_spectra(s_beats, sampling_rate, 
-                       calc_freqs=True, calc_dists=True,
+                       calc_freqs=True, calc_dists=True, dB = True,
                        dists=DISTS, B =200e6, T = 0.1e-3)
     
 
@@ -144,11 +144,11 @@ def task2():
     t_axis = np.linspace(0, measuring_time, int(samples))
 
     amplitudes = calc_amplitudes(DISTS, reference_0 = False)
-
+    
     s_beats, received_signal = create_tones(DISTS, t_axis, amplitudes= amplitudes)
 
     plot_power_spectra(s_beats, sampling_rate, 
-                       calc_freqs=True, calc_dists=True,
+                       calc_freqs=True, calc_dists=True, dB = True,
                        dists=DISTS, B =200e6, T = 0.1e-3)
 
 
@@ -156,7 +156,7 @@ def task2():
 def task3():
     sampling_rate = 500e6
     measuring_time = 0.1e-3 ##start taking really long if larger than 0.001
-    snr_db = -30 #(dB)
+    snr_db = 3 #-30 #(dB)
 
     samples = measuring_time*sampling_rate
     t_axis = np.linspace(0, measuring_time, int(samples))
@@ -171,10 +171,9 @@ def task3():
 
     s_with_noise = s_beats + noise_signal
 
-    
 
     plot_power_spectra(s_with_noise, sampling_rate, 
-                       calc_freqs=True, calc_dists=True,
+                       calc_freqs=True, calc_dists=True, dB = True,
                        dists=DISTS, B =200e6, T = 0.1e-3)
     return "Fuck you"
 
@@ -197,17 +196,17 @@ def task4():
         noise_signal = create_noise_signal(s_beats, measuring_time, snr_db)
         s_with_noise = s_beats + noise_signal
         s_average = s_average + s_with_noise
-    s_average = s_average
+    s_average = s_average # klopt
 
     
 
     plot_power_spectra(s_average, sampling_rate, 
-                       calc_freqs=True, calc_dists=True,
+                       calc_freqs=True, calc_dists=True, dB = True,
                        dists=DISTS, B =200e6, T = 0.1e-3)
     return "Fuck you"
 
 if __name__ == "__main__":
     #task1()
     #task2()
-    #task3():
+    #task3()
     task4()
