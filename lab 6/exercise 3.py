@@ -1,6 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.fft import fft,fftshift
+from math import ceil
 # =============================================================================
 # PART A
 # =============================================================================
@@ -53,19 +54,31 @@ Signal = np.abs(fftshift(fft(signal)))
 Signal = Signal/np.max(Signal)
 
 
-freqax = np.linspace(-F_s/2,F_s/2,num=len(Signal))
-
+freqax = np.linspace(-F_s/2,F_s/2,num=len(Signal))/1e6
 
 fig, ax = plt.subplots(1,1)
 ax.plot(freqax,Signal)
 # ax.set_xlim(11e6,13e6)
-
+ax.set_xlabel("Frequency (MHz)")
 plt.show()
 
 
 
 
+# =============================================================================
+# PART C
+# =============================================================================
+print("Part C")
 
+f_c = 9.4e9
+dv = 1 # m/s
+PRF = 1500
+
+doppler_res_freq = dv * 2 * f_c / 3e8
+T_d = 1/doppler_res_freq
+
+M = PRF * T_d
+print(f"{ceil(M)} pulses must be processed")
 
 
 
