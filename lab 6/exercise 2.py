@@ -41,6 +41,7 @@ df = f_c_b - f_c_a
 # Rayleigh resolution
 tau_pulse = 1/df
 
+# convert to microseconds
 tau_pulse *=1e6
 
 print(f"The minimum pulse length should be {round(tau_pulse,3)} us")
