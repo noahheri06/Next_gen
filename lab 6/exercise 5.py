@@ -149,24 +149,32 @@ def task2(RadarData):
             plot_power_spectra(power_db, calc_dists=False)
 
 
-def task2b(RadarData):
-    RadarData_AlongRow = zero_append(RadarData[i], 15536) #DFT zooi maar totale machten van 2 werken beste ## nu 2^16
-    FFT_RadarData_AlongRow = np.fft.fft(RadarData_AlongRow)
-    FFT_RadarData_AlongRow = np.fft.fftshift(FFT_RadarData_AlongRow)
 
-        
 
-    freq_axis = fft.fftfreq(len(FFT_RadarData_AlongRow), d=1/F_SAMPLE)
-        
+def task3(RadarData):
+    fig, ax = plt.subplots(1,1)
+    FFT_RadarData = np.fft.fft2(RadarData)
     
-    Range = FFT_RadarData_AlongRow*(C*T)/(2*B)
-    plt.imshow(Range)
-    freq_axis = fft.fftfreq(len(power_spectrum), d=1/F_SAMPLE)
-    return "fuckyou"
+    FFT_RadarData = np.abs(FFT_RadarData)
+    
+    FFT_RadarData = FFT_RadarData/np.max(FFT_RadarData)
+    
+    print(FFT_RadarData)
+    print(np.max(FFT_RadarData), np.argmax(FFT_RadarData))
+    
+    FFT_RadarData = 20*np.log10(FFT_RadarData)
+    
+    R_MAX = C * T / (2 * B) * F_SAMPLE
+    ax.imshow(FFT_RadarData,vmin = -100, vmax=0, extent = (-R_MAX/2, R_MAX/2, 0,250), aspect="auto", cmap='magma')
+    #ax.set_xlim(18500,R_MAX/2)
+    plt.show()
+    return
+
 
 
 
 if __name__ == "__main__":
     RadarData = task1()
-    task2(RadarData)
+    # task2(RadarData)
+    task3(RadarData)
 
