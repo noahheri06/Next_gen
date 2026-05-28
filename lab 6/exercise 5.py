@@ -1,3 +1,7 @@
+
+
+import scipy.io
+
 C = 3e8
 
 B = 200e6
@@ -6,6 +10,7 @@ F_CARRIER = 2e9
 F_SAMPLE = 500e6
 
 FRAME_LENGTH = 25.6e-3
+
 
 
 def task1():
@@ -17,5 +22,8 @@ def task1():
 
     ChirpsInFrame = FRAME_LENGTH/T
     print(f"The amount of chirps in one frame is {ChirpsInFrame}")
+
+    RadarData = scipy.io.loadmat('lab 6\Data file week6 highSNR.mat')
+    print(RadarData)
 
 
