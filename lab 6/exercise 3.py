@@ -48,7 +48,7 @@ for i in range(40):
     
     
 # take fft
-Signal = np.abs(fftshift(fft(signal)))
+Signal = np.abs(fftshift(fft(signal, n = len(signal)*5)))
 
 #normalize
 Signal = Signal/np.max(Signal)

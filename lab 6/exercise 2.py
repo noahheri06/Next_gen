@@ -9,7 +9,8 @@ print("Part A")
 
 X = np.random.randint(1,10)
 f_c = 12e9
-# X = 1 # laatste cijfer van mijn studentennummer
+X = 7 # laatste cijfer van studentnummer Noah
+
 print(f"X used is {X}")
 
 tau_pulse = X * 1e-6
