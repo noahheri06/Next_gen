@@ -95,7 +95,7 @@ def task1():
     Totalsamples = SamplesPerChirp * ChirpsInFrame
     print(f"The amount of total samples in is {Totalsamples}")
 
-    RadarData = scipy.io.loadmat('lab 6/Data file week6 highSNR.mat', mat_dtype = False)['s_beat_vector']
+    RadarData = scipy.io.loadmat('Data file week6 highSNR.mat', mat_dtype = False)['s_beat_vector']
     RadarData = RadarData[:,0]
 
     RadarData = np.reshape(RadarData, (int(ChirpsInFrame), int(SamplesPerChirp)))
@@ -104,11 +104,23 @@ def task1():
 
 
 def task2(RadarData):
-    # fig, ax = plt.subplots(1,1)
-    # FFT_RadarData = np.fft.fft(RadarData)
-    # ax.imshow(np.abs(FFT_RadarData), extent =  (-F_SAMPLE,F_SAMPLE,0,256), aspect="auto", cmap='magma', norm="linear")
-    # plt.show()
-    # return
+    fig, ax = plt.subplots(1,1)
+    FFT_RadarData = np.fft.fft(RadarData)
+    
+    FFT_RadarData = np.abs(FFT_RadarData)
+    
+    FFT_RadarData = FFT_RadarData/np.max(FFT_RadarData)
+    
+    print(FFT_RadarData)
+    print(np.max(FFT_RadarData), np.argmax(FFT_RadarData))
+    
+    FFT_RadarData = 20*np.log10(FFT_RadarData)
+    
+    R_MAX = C * T / (2 * B) * F_SAMPLE
+    ax.imshow(FFT_RadarData,vmin = -100, vmax=0, extent = (-R_MAX/2, R_MAX/2, 0,250), aspect="auto", cmap='magma')
+    ax.set_xlim(18500,R_MAX/2)
+    plt.show()
+    return
 
     for i in range(len(RadarData[:,0])):
         RadarData_AlongRow = zero_append(RadarData[i], 15536) #DFT zooi maar totale machten van 2 werken beste ## nu 2^16
