@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 from scipy.io import loadmat
 from scipy.fft import fft, fftshift, fftfreq
 from scipy.signal import butter, filtfilt
-
+import os
+os.makedirs("plots", exist_ok=True)
 def lowpass_filter(signal, fs, cutoff=1e6): 
     nyq = fs / 2
     normal_cutoff = cutoff / nyq
