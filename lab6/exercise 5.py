@@ -6,8 +6,11 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 import h5py
+import os
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-
+# then your original line works as-is
+scipy.io.loadmat('Data file week6 highSNR.mat')
 
 C = 3e8
 
@@ -119,6 +122,8 @@ def task2(RadarData):
     R_MAX = C * T / (2 * B) * F_SAMPLE
     ax.imshow(FFT_RadarData,vmin = -100, vmax=0, extent = (-R_MAX/2, R_MAX/2, 0,250), aspect="auto", cmap='magma')
     ax.set_xlim(18500,R_MAX/2)
+    plt.xlabel("Range [m]")
+    plt.ylabel("Chirp")
     plt.show()
     return
 
@@ -149,12 +154,10 @@ def task2(RadarData):
             plot_power_spectra(power_db, calc_dists=False)
 
 
-
-
 def task3(RadarData):
     fig, ax = plt.subplots(1,1)
     FFT_RadarData = np.fft.fft2(RadarData)
-    
+
     FFT_RadarData = np.abs(FFT_RadarData)
     
     FFT_RadarData = FFT_RadarData/np.max(FFT_RadarData)
@@ -165,16 +168,39 @@ def task3(RadarData):
     FFT_RadarData = 20*np.log10(FFT_RadarData)
     
     R_MAX = C * T / (2 * B) * F_SAMPLE
-    ax.imshow(FFT_RadarData,vmin = -100, vmax=0, extent = (-R_MAX/2, R_MAX/2, 0,250), aspect="auto", cmap='magma')
-    #ax.set_xlim(18500,R_MAX/2)
+    Fd_MAX = 1/(2*T)
+    ax.imshow(FFT_RadarData,vmin = -100, vmax=0, extent = (-R_MAX/2, R_MAX/2, -Fd_MAX,Fd_MAX), aspect="auto", cmap='magma')
+    ax.set_xlim(18500,R_MAX/2)
+    plt.xlabel("Range [m]")
+    plt.ylabel("Frequency [Hz]")
     plt.show()
     return
 
+def task4(RadarData):
+    fig, ax = plt.subplots(1,1)
+    FFT_RadarData = np.fft.fft2(RadarData)
 
+    FFT_RadarData = np.abs(FFT_RadarData)
+    
+    FFT_RadarData = FFT_RadarData/np.max(FFT_RadarData)
+    
+    print(FFT_RadarData)
+    print(np.max(FFT_RadarData), np.argmax(FFT_RadarData))
+    
+    FFT_RadarData = 20*np.log10(FFT_RadarData)
+    
+    R_MAX = C * T / (2 * B) * F_SAMPLE
+    V_MAX = C / (F_CARRIER * T * 4)
+    ax.imshow(FFT_RadarData,vmin = -100, vmax=0, extent = (-R_MAX/2, R_MAX/2, -V_MAX,V_MAX), aspect="auto", cmap='magma')
+    ax.set_xlim(18500,R_MAX/2)
+    plt.xlabel("Range [m]")
+    plt.ylabel("Velocity [m/s]")
+    plt.show()
+    return
 
 
 if __name__ == "__main__":
     RadarData = task1()
     # task2(RadarData)
-    task3(RadarData)
-
+    # task3(RadarData)
+    task4(RadarData)
