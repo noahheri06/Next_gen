@@ -7,6 +7,7 @@ from setupPlutoSDR_TDD import initialize_Pluto_TDD
 from TDD_Transreceiver import pluto_transmit_receive
 import matplotlib.pyplot as plt
 from scipy.signal import butter, filtfilt
+from numpy.fft import fftshift, fftfreq, fft
 
 def lowpass_filter(signal, fs, cutoff=1e6): 
     nyq = fs / 2
@@ -15,18 +16,18 @@ def lowpass_filter(signal, fs, cutoff=1e6):
     signal_filtered = filtfilt(b, a, signal)
     return signal_filtered
 
-#plputo constants
+#pluto constants
 Pluto_IP = '192.168.2.1'
-PlutoSamprate = 40e6
-Tx_CenterFrequency = 2.5e9
-Rx_CenterFrequency = 2.5e9
-tx_gain = -10
+PlutoSamprate = 50e6
+Tx_CenterFrequency = 2.4e9
+Rx_CenterFrequency = 2.4e9
+tx_gain = 0
 rx_gain = 10
 
 # Radar waveform parameters
-B = 25e6
+B = 5e6
 T = 100e-6
-f0 = 2.5e9
+f0 = 2.4e9
 fs = PlutoSamprate
 c = 3e8
 
@@ -43,7 +44,10 @@ save_path = "pluto_data"
 
 tx_waveform = ((2**14) * sig_A).astype(np.complex64)
 frame_length_samples = tx_waveform.shape[0]
-capture_range = 100
+capture_range = 1_000_000
+
+plt.plot(fftshift(np.fft.fftfreq(len(tx_waveform), d=1/fs)), np.abs(fftshift(np.fft.fft(tx_waveform))))
+plt.show()
 
 results = np.array(pluto_transmit_receive(my_sdr, tddn, tx_waveform, capture_range, frame_length_samples, save_path))
 my_sdr.close()

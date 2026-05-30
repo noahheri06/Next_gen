@@ -29,7 +29,7 @@ print(f"The Doppler resolution is {doppler_res_freq} Hz")
 print("Part B")
 
 f_c = 12e6 # arbitrary
-F_s = 100e6 # sampling freq
+F_s = 50e6 # sampling freq
 
 
 signal = np.zeros(int(CPI * F_s))
@@ -48,7 +48,7 @@ for i in range(40):
     
     
 # take fft
-Signal = np.abs(fftshift(fft(signal, n = len(signal)*5)))
+Signal = np.abs(fftshift(fft(signal, n = int(2**(np.ceil(np.log2(len(signal)))+2)))))
 
 #normalize
 Signal = Signal/np.max(Signal)
@@ -58,6 +58,7 @@ freqax = np.linspace(-F_s/2,F_s/2,num=len(Signal))/1e6
 
 fig, ax = plt.subplots(1,1)
 ax.plot(freqax,Signal)
+ax.plot(freqax, np.abs(np.sinc(freqax-f_c/1e6))) # plot sinc function for reference
 # ax.set_xlim(11e6,13e6)
 ax.set_xlabel("Frequency (MHz)")
 plt.show()
