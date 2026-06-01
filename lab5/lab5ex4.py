@@ -128,7 +128,7 @@ def plot_power_spectra(received_signal, sampling_rate, dB = False, calc_freqs = 
     ax2.set_xticklabels([f"{f/1000:.0f}" for f in freq_ticks])
     ax2.set_xlabel("Frequency (kHz)")
 
-    plt.title("FFT of Situation A")
+    plt.title("FFT of Situation B")
     plt.show()
 
 def plot_time_domain(received_signal, time_axis):
@@ -140,7 +140,7 @@ def plot_time_domain(received_signal, time_axis):
     plt.ylim(-3,3)
     plt.ylabel("Amplitude")
     plt.grid()
-    plt.title("Time Domain Signal of Situation A")
+    plt.title("Time Domain Signal of Situation B")
     plt.show()
 
 def calc_signal_power(received_signal, time):
@@ -155,7 +155,7 @@ def create_noise_signal(received_signal, measuring_time, snr_db):
 
     samples = len(received_signal)
     noise = np.random.normal(size = samples) + 1j*np.random.normal(size= samples)
-    noise = noise*(noise_power**(1/2))/2
+    noise = noise*((noise_power)**(1/2))/2
     return noise
 
 def plot_power_spectra_with_noise (s_beats, measuring_time, received_signal, sampling_rate, noise_dB, t_axis, dB = False, calc_freqs = False, calc_dists = False, dists = [], B =0, T =0):
@@ -194,8 +194,8 @@ def plot_power_spectra_with_noise (s_beats, measuring_time, received_signal, sam
 
 
     if dB:
-        ax1.plot(range_axis[:half], power_db[:half])
-        ax1.plot(range_axis[:half], noise_power_db[:half])
+        ax1.plot(range_axis[:half], power_db[:half], label = "Noiseless Signal")
+        ax1.plot(range_axis[:half], noise_power_db[:half], label = "Noisy Signal")
         ax1.set_ylabel("Power (dB)")
         ax1.set_ylim(-80, 1)
 
@@ -226,9 +226,122 @@ def plot_power_spectra_with_noise (s_beats, measuring_time, received_signal, sam
     ax2.set_xticklabels([f"{f/1000:.0f}" for f in freq_ticks])
     ax2.set_xlabel("Frequency (kHz)")
 
-    plt.title("FFT of Situation A")
+    plt.title("FFT of Situation C (3dB)")
+    ax1.legend()
     plt.show()
 
+
+
+def plot_power_spectra_with_noise_coherent (s_beats, measuring_time, received_signal, sampling_rate, noise_dB, t_axis, dB = False, calc_freqs = False, calc_dists = False, dists = [], B =0, T =0):
+    
+
+    k1 = 1
+    k2 = 50
+    k3 = 200
+
+    s_average1 = np.zeros_like(s_beats)
+    s_average2 = np.zeros_like(s_beats)
+    s_average3 = np.zeros_like(s_beats)
+    coherent_noise = np.zeros_like(s_beats)
+
+    for i in range(k3):
+        noise_signal = create_noise_signal(s_beats, measuring_time, noise_dB)
+        coherent_noise = coherent_noise+noise_signal
+        if (i == k1-1):
+            s_average1 = s_beats + coherent_noise/k1
+        if (i == k2-1):
+            s_average2 = s_beats + coherent_noise/k2
+        if (i == k3-1):
+            s_average3 = s_beats + coherent_noise/k3
+        
+
+    received_signal_with_noise1 = np.real(s_average1)
+    received_signal_with_noise2 = np.real(s_average2)
+    received_signal_with_noise3 = np.real(s_average3)
+
+
+
+    padded_zero = zero_append(received_signal, 15536) ## padded to the next power of two cuz apperently that works best (does appear so)
+    received_fft = fft.fft(padded_zero)
+    power_spectrum = np.abs(received_fft)**2
+
+
+    noise_padded_zero1 = zero_append(received_signal_with_noise1, 15536) ## padded to the next power of two cuz apperently that works best (does appear so)
+    noise_received_fft1 = fft.fft(noise_padded_zero1)
+    noise_power_spectrum1 = np.abs(noise_received_fft1)**2
+
+    noise_padded_zero2 = zero_append(received_signal_with_noise2, 15536) ## padded to the next power of two cuz apperently that works best (does appear so)
+    noise_received_fft2 = fft.fft(noise_padded_zero2)
+    noise_power_spectrum2 = np.abs(noise_received_fft2)**2
+
+    noise_padded_zero3 = zero_append(received_signal_with_noise3, 15536) ## padded to the next power of two cuz apperently that works best (does appear so)
+    noise_received_fft3 = fft.fft(noise_padded_zero3)
+    noise_power_spectrum3 = np.abs(noise_received_fft3)**2
+
+    max_db = max(np.max(power_spectrum), np.max(noise_power_spectrum1), np.max(noise_power_spectrum2), np.max(noise_power_spectrum3))
+    
+    power_db = 10*np.log10(power_spectrum / max_db + 1e-12)
+    noise_power_db1 = 10*np.log10(noise_power_spectrum1 / max_db + 1e-12)
+    noise_power_db2 = 10*np.log10(noise_power_spectrum2 / max_db + 1e-12)
+    noise_power_db3 = 10*np.log10(noise_power_spectrum3 / max_db + 1e-12)
+
+
+    #plt.plot(t_axis, noise_signal )
+    # plt.plot(t_axis,received_signal)
+    # plt.plot(t_axis,received_signal_with_noise, alpha=0.3)
+    # plt.show()
+
+
+
+
+    freq_axis = fft.fftfreq(len(power_spectrum), d=1/sampling_rate)
+    range_axis = freq_axis * C * T / (2 * B)
+
+    fig, ax1 = plt.subplots(figsize=(10,5))
+
+    half = len(freq_axis)//2
+
+
+    if dB:
+        ax1.plot(range_axis[:half], power_db[:half], label = "Noiseless Signal")
+        ax1.plot(range_axis[:half], noise_power_db1[:half], label = "Noisy Signal (k=1)")
+        ax1.plot(range_axis[:half], noise_power_db2[:half], label = "Noisy Signal (k=50)")
+        ax1.plot(range_axis[:half], noise_power_db3[:half], label = "Noisy Signal (k=200)")
+        ax1.set_ylabel("Power (dB)")
+        ax1.set_ylim(-80, 1)
+
+    else:
+        ax1.plot(range_axis[:half], power_spectrum[:half])
+        ax1.set_ylabel("Power (W)")
+
+
+    if (calc_freqs == True):
+        freqs = calc_expected_freqs(dists, B, T)
+        for distance in dists:
+            ax1.axvline(distance, ls="--", c="red")
+
+    if (calc_dists == True):
+        found_dists = recalc_dists_from_signal(noise_padded_zero1, sampling_rate, B, T)
+        found_dists = recalc_dists_from_signal(noise_padded_zero2, sampling_rate, B, T)
+        found_dists = recalc_dists_from_signal(noise_padded_zero3, sampling_rate, B, T)
+
+
+    ax1.set_xlim(0, 30)
+    range_ticks = np.arange(0, 31, 5)
+    ax1.set_xticks(range_ticks)
+    ax1.set_xlabel("Range (m)")
+    ax1.grid()
+
+    ax2 = ax1.twiny()
+    ax2.set_xlim(ax1.get_xlim())
+    freq_ticks = 2 * B * range_ticks / (C * T)
+    ax2.set_xticks(range_ticks)
+    ax2.set_xticklabels([f"{f/1000:.0f}" for f in freq_ticks])
+    ax2.set_xlabel("Frequency (kHz)")
+
+    plt.title("FFT of Situation D")
+    ax1.legend()
+    plt.show()
 
 def task1():
     sampling_rate = 500e6
@@ -267,7 +380,7 @@ def task2():
 def task3():
     sampling_rate = 500e6
     measuring_time = 0.1e-3 ##start taking really long if larger than 0.001
-    snr_db = 3 #-30 #(dB)
+    snr_db = -30 #-30 #(dB)
 
     samples = measuring_time*sampling_rate
     t_axis = np.linspace(0, measuring_time, int(samples))
@@ -285,9 +398,8 @@ def task3():
 
 def task4():
     sampling_rate = 500e6
-    measuring_time = 0.1e-2 ##start taking really long if larger than 0.001
-    snr_db = 3 #(dB)
-    k = 200
+    measuring_time = 0.1e-3 ##start taking really long if larger than 0.001
+    snr_db = -30 #(dB)
 
     samples = measuring_time*sampling_rate
     t_axis = np.linspace(0, measuring_time, int(samples))
@@ -297,17 +409,9 @@ def task4():
     s_beats, received_signal = create_tones(DISTS, t_axis, amplitudes= amplitudes)
     #print(s_beats)
 
-    s_average = np.zeros_like(s_beats)
-    for i in range(k):
-        print(i)
-        noise_signal = create_noise_signal(s_beats, measuring_time, snr_db)
-        s_with_noise = s_beats + noise_signal
-        s_average = s_average + s_with_noise
-    s_average = s_average # klopt
-    received_signal_average = np.real(s_average)
-    received_signal_average = zero_append(received_signal_average)
 
-    plot_power_spectra(received_signal_average, sampling_rate, 
+
+    plot_power_spectra_with_noise_coherent(s_beats, measuring_time, received_signal, sampling_rate, snr_db, t_axis,
                        calc_freqs=True, calc_dists=True, dB = True,
                        dists=DISTS, B =200e6, T = 0.1e-3)
     return "Fuck you"
@@ -317,6 +421,6 @@ if __name__ == "__main__":
     #task2()
     task3()
     #task4()
-    calc_expected_freqs([6.3], 200e6, 0.1e-3)
+    #calc_expected_freqs([6.3], 200e6, 0.1e-3)
 
     print("Done")
