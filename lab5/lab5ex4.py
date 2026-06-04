@@ -378,7 +378,7 @@ def task2():
 def task3():
     sampling_rate = 500e6
     measuring_time = 0.1e-3 ##start taking really long if larger than 0.001
-    snr_db = -30 #-30 #(dB)
+    snr_db = 3 #-30 #(dB)
 
     samples = measuring_time*sampling_rate
     t_axis = np.linspace(0, measuring_time, int(samples))
@@ -397,7 +397,7 @@ def task3():
 def task4():
     sampling_rate = 500e6
     measuring_time = 0.1e-3 ##start taking really long if larger than 0.001
-    snr_db = -30 #(dB)
+    snr_db = 3 #(dB)
 
     samples = measuring_time*sampling_rate
     t_axis = np.linspace(0, measuring_time, int(samples))
@@ -417,8 +417,8 @@ def task4():
 if __name__ == "__main__":
     #task1()
     #task2()
-    #task3()
-    task4()
+    task3()
+    #task4()
     #calc_expected_freqs([6.3], 200e6, 0.1e-3)
 
     print("Done")
