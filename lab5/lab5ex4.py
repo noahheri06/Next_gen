@@ -143,13 +143,11 @@ def plot_time_domain(received_signal, time_axis):
     plt.title("Time Domain Signal of Situation B")
     plt.show()
 
-def calc_signal_power(received_signal, time):
-    abs_square = np.abs(received_signal)**2
-    power = abs_square/time
-    return power
+def calc_signal_power(received_signal):
+    return np.mean(np.abs(received_signal)**2)
 
-def create_noise_signal(received_signal, measuring_time, snr_db):
-    signal_power = calc_signal_power(received_signal, measuring_time)
+def create_noise_signal(received_signal, snr_db):
+    signal_power = calc_signal_power(received_signal)
     snr_factor = 10**(snr_db/10)
     noise_power = signal_power/snr_factor
 
@@ -160,7 +158,7 @@ def create_noise_signal(received_signal, measuring_time, snr_db):
 
 def plot_power_spectra_with_noise (s_beats, measuring_time, received_signal, sampling_rate, noise_dB, t_axis, dB = False, calc_freqs = False, calc_dists = False, dists = [], B =0, T =0):
     
-    noise_signal = create_noise_signal(s_beats, measuring_time, noise_dB)
+    noise_signal = create_noise_signal(s_beats, noise_dB)
     s_with_noise = s_beats + noise_signal
     received_signal_with_noise = np.real(s_with_noise)
 
@@ -197,7 +195,7 @@ def plot_power_spectra_with_noise (s_beats, measuring_time, received_signal, sam
         ax1.plot(range_axis[:half], power_db[:half], label = "Noiseless Signal")
         ax1.plot(range_axis[:half], noise_power_db[:half], label = "Noisy Signal")
         ax1.set_ylabel("Power (dB)")
-        ax1.set_ylim(-80, 1)
+        ax1.set_ylim(-60, 1)
 
     else:
         ax1.plot(range_axis[:half], power_spectrum[:half])
@@ -207,14 +205,14 @@ def plot_power_spectra_with_noise (s_beats, measuring_time, received_signal, sam
     if (calc_freqs == True):
         freqs = calc_expected_freqs(dists, B, T)
         for distance in dists:
-            ax1.axvline(distance, ls="--", c="red")
+            ax1.axvline(distance, ls="--", c="red", alpha = 0.3)
 
     if (calc_dists == True):
         found_dists = recalc_dists_from_signal(noise_padded_zero, sampling_rate, B, T)
 
 
-    ax1.set_xlim(0, 30)
-    range_ticks = np.arange(0, 31, 5)
+    ax1.set_xlim(0, 100)
+    range_ticks = np.arange(0, 101, 5)
     ax1.set_xticks(range_ticks)
     ax1.set_xlabel("Range (m)")
     ax1.grid()
@@ -226,7 +224,7 @@ def plot_power_spectra_with_noise (s_beats, measuring_time, received_signal, sam
     ax2.set_xticklabels([f"{f/1000:.0f}" for f in freq_ticks])
     ax2.set_xlabel("Frequency (kHz)")
 
-    plt.title("FFT of Situation C (3dB)")
+    plt.title("FFT of Situation C (-30 dB)")
     ax1.legend()
     plt.show()
 
@@ -245,7 +243,7 @@ def plot_power_spectra_with_noise_coherent (s_beats, measuring_time, received_si
     coherent_noise = np.zeros_like(s_beats)
 
     for i in range(k3):
-        noise_signal = create_noise_signal(s_beats, measuring_time, noise_dB)
+        noise_signal = create_noise_signal(s_beats, noise_dB)
         coherent_noise = coherent_noise+noise_signal
         if (i == k1-1):
             s_average1 = s_beats + coherent_noise/k1
@@ -318,7 +316,7 @@ def plot_power_spectra_with_noise_coherent (s_beats, measuring_time, received_si
     if (calc_freqs == True):
         freqs = calc_expected_freqs(dists, B, T)
         for distance in dists:
-            ax1.axvline(distance, ls="--", c="red")
+            ax1.axvline(distance, ls="--", c="red", alpha = 0.3)
 
     if (calc_dists == True):
         found_dists = recalc_dists_from_signal(noise_padded_zero1, sampling_rate, B, T)
@@ -419,8 +417,8 @@ def task4():
 if __name__ == "__main__":
     #task1()
     #task2()
-    task3()
-    #task4()
+    #task3()
+    task4()
     #calc_expected_freqs([6.3], 200e6, 0.1e-3)
 
     print("Done")
