@@ -1,16 +1,19 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal.windows import blackman
+import pyttsx3
+engine = pyttsx3.init()
 
 # ==========================================
 # 1. RADAR & MEASUREMENT PARAMETERS
 # ==========================================
-FILENAME = r"cables connected.txt"
+FILENAME = r"open3.txt"
 FILE_PATH = f'measurements/{FILENAME}'
-SAMPLING_RATE = 5000/(4e-3)           # Hz
+num_pulses = 20
+SAMPLING_RATE = 5000/(num_pulses*1e-3) # Hz
 CHIRP_BANDWIDTH = 80e6       # Hz
 CHIRP_DURATION = 1e-3         # Seconds
-TRIGGER_THRESHOLD = 1700      # mV
+TRIGGER_THRESHOLD = 450      # mV
 SPEED_OF_LIGHT = 3e8          # m/s
 
 # ==========================================
@@ -91,7 +94,7 @@ def process_radar_data():
     
     # Convert Magnitude to decibels (dB)
     # Adding a tiny offset to avoid log10(0) warnings just in case
-    fft_mag_db = 20 * np.log10((fft_mag + 1e-12) / np.max(fft_mag)) 
+    fft_mag_db = 20 * np.log10((fft_mag + 1e-12))
     
     # Generate Range Axis
     range_axis = (SPEED_OF_LIGHT * CHIRP_DURATION * freqs) / (2 * CHIRP_BANDWIDTH)
@@ -114,8 +117,8 @@ def process_radar_data():
     plt.plot(freqs / 1e3, fft_mag_db, color='green')
     plt.title("2. Frequency Spectrum (Beat Frequencies)")
     plt.xlabel("Frequency (kHz)")
-    plt.ylabel("Magnitude (dB)")
-    plt.ylim(-30, 0)  # Focus on the main lobe and suppress noise floor
+    plt.ylabel("Magnitude (dBV)")
+    # plt.ylim(-30, 0)  # Focus on the main lobe and suppress noise floor
     plt.grid(True)
     
     # Plot 3: Range Profile
@@ -123,8 +126,8 @@ def process_radar_data():
     plt.plot(range_axis, fft_mag_db, color='red')
     plt.title("3. Radar Range Profile")
     plt.xlabel("Range (Meters)")
-    plt.ylabel("Magnitude (dB)")
-    plt.ylim(-30, 0)  # Focus on the main lobe and suppress noise floor
+    plt.ylabel("Magnitude (dBV)")
+    # plt.ylim(-30, 0)  # Focus on the main lobe and suppress noise floor
     plt.xlim(0, 20)
     plt.grid(True)
     
@@ -143,6 +146,12 @@ def process_radar_data():
     plt.tight_layout()
     plt.savefig(rf"plots/{FILENAME}_radar_plots.png")
     plt.show()
+
+    # engine.say("maximum measurement is " + str(round(np.max(fft_mag_db), 1)) + " dBV" + " and the target range is " + str(round(range_axis[np.argmax(fft_mag_db)], 1)) + " meters")
+    # engine.runAndWait()
+
+    print("maximum measurement is ", np.max(fft_mag_db), " dBV")
+    print("target range is ", range_axis[np.argmax(fft_mag_db)], " meters")
 
 if __name__ == "__main__":
     process_radar_data()

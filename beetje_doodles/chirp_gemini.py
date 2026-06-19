@@ -80,8 +80,5 @@ def main():
     # Safely spin down the TDD engine and clear hardware buffers
     pluto_tdd.stop_tdd_stream(stream_handle)
 
-    # Plot the FFT of the original complex chirp
-    plot_fft_signal(sig_A, fs)
-
 if __name__ == "__main__":
     main()
