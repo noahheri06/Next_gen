@@ -86,6 +86,11 @@ class DataProcessing:
             aligned_pulses = np.array([p[:min_len] for p in all_pulses])
             coherent_signal = np.mean(aligned_pulses, axis=0)
             
+            
+            if basename=="through":
+                coherent_signal *= 1#1.22#5.3
+            
+            
             t = np.arange(min_len) / self.sampling_rate
             window = blackman(min_len)
             windowed_signal = coherent_signal * window
@@ -272,9 +277,9 @@ class RadarGUI:
                 
             data = self.dp.processed_data[name]
             
-            sub_mag_lin = np.abs(data['fft_mag_lin'] - control_data['fft_mag_lin'])
+            sub_mag_lin = np.abs(data['fft_mag_lin']/np.max(data['fft_mag_lin']) - control_data['fft_mag_lin']/np.max(control_data['fft_mag_lin']))
             sub_mag_db = 20 * np.log10(sub_mag_lin + 1e-12)
-            sub_signal = data['coherent_signal'] - control_data['coherent_signal']
+            sub_signal = data['coherent_signal']/np.max(data['coherent_signal']) - control_data['coherent_signal']/np.max(control_data['coherent_signal'])
             
             label_text = f"{name} - {control_name}"
             
