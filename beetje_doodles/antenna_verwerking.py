@@ -1,8 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal.windows import blackman
-import pyttsx3
-engine = pyttsx3.init()
 
 # ==========================================
 # 1. RADAR & MEASUREMENT PARAMETERS
@@ -146,9 +144,6 @@ def process_radar_data():
     plt.tight_layout()
     plt.savefig(rf"plots/{FILENAME}_radar_plots.png")
     plt.show()
-
-    # engine.say("maximum measurement is " + str(round(np.max(fft_mag_db), 1)) + " dBV" + " and the target range is " + str(round(range_axis[np.argmax(fft_mag_db)], 1)) + " meters")
-    # engine.runAndWait()
 
     print("maximum measurement is ", np.max(fft_mag_db), " dBV")
     print("target range is ", range_axis[np.argmax(fft_mag_db)], " meters")
